@@ -134,6 +134,148 @@
             color: #235181;
             font-weight: 600;
         }
+        .pagination-wrapper {
+            margin-top: 15px;
+            display: flex;
+            justify-content: center;
+        }
+        .pagination {
+            display: flex;
+            gap: 8px;
+            list-style: none;
+            padding-left: 0;
+            margin: 0;
+        }
+        .pagination li {
+            border-radius: 999px;
+            overflow: hidden;
+        }
+        .pagination li a,
+        .pagination li span {
+            display: inline-block;
+            padding: 8px 14px;
+            border: 1px solid #e5e7eb;
+            text-decoration: none;
+            color: #1f2937;
+            font-size: 14px;
+            background: white;
+        }
+        .pagination li.active span {
+            background-color: #235181;
+            color: white;
+            border-color: #235181;
+        }
+        .pagination li a:hover {
+            background-color: #edf2f7;
+        }
+        .pagination li.disabled span {
+            color: #9ca3af;
+            background-color: #f3f4f6;
+            border-color: #e5e7eb;
+            cursor: not-allowed;
+        }
+        .auth-wrapper {
+            min-height: calc(100vh - 160px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, rgba(35,81,129,0.08), rgba(35,81,129,0.02));
+        }
+        .auth-card {
+            width: 100%;
+            max-width: 900px;
+            background: white;
+            border-radius: 18px;
+            box-shadow: 0 20px 50px rgba(15,23,42,0.08);
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        }
+        .auth-panel {
+            padding: 40px;
+        }
+        .auth-panel h2 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+        .auth-panel p.subtext {
+            color: #6b7280;
+            margin-bottom: 30px;
+        }
+        .auth-side {
+            background: linear-gradient(135deg, #235181, #1a3d63);
+            color: white;
+            padding: 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 18px;
+        }
+        .auth-side h3 {
+            font-size: 26px;
+            margin: 0;
+        }
+        .auth-input {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 18px;
+        }
+        .auth-input label {
+            font-weight: 600;
+            color: #1f2937;
+        }
+        .auth-input input {
+            padding: 12px 14px;
+            border-radius: 10px;
+            border: 1px solid #e5e7eb;
+            font-size: 15px;
+        }
+        .auth-dual {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 16px;
+        }
+        .auth-extra {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+        }
+        .auth-extra a {
+            color: #235181;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .auth-extra a:hover {
+            text-decoration: underline;
+        }
+        .social-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 12px;
+            padding: 12px;
+            text-decoration: none;
+            color: #1f2937;
+            font-weight: 600;
+            margin-bottom: 18px;
+        }
+        .social-button img {
+            width: 20px;
+            height: 20px;
+        }
+        @media (max-width: 768px) {
+            .auth-panel, .auth-side {
+                padding: 25px;
+            }
+            .auth-card {
+                grid-template-columns: 1fr;
+            }
+        }
         .page-content {
             line-height: 1.7;
             color: #333;
@@ -250,5 +392,19 @@
 
     @stack('scripts')
 </body>
+        <button id="backToTopBtn" style="position: fixed; bottom: 30px; right: 30px; display: none; background-color: #235181; color: white; border: none; border-radius: 50%; width: 50px; height: 50px; font-size: 20px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">↑</button>
+        <script>
+            const backToTopBtn = document.getElementById('backToTopBtn');
+            window.addEventListener('scroll', () => {
+                if (document.body.scrollTop > 400 || document.documentElement.scrollTop > 400) {
+                    backToTopBtn.style.display = 'block';
+                } else {
+                    backToTopBtn.style.display = 'none';
+                }
+            });
+            backToTopBtn.addEventListener('click', () => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        </script>
 </html>
 

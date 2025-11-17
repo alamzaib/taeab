@@ -7,6 +7,7 @@ use App\Models\Seeker;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class SeekerAuthController extends Controller
@@ -23,9 +24,17 @@ class SeekerAuthController extends Controller
             'password' => 'required',
         ]);
 
-        if (Auth::guard('seeker')->attempt($request->only('email', 'password'), $request->filled('remember'))) {
+        $credentials = $request->only('email', 'password');
+
+        if (Auth::guard('seeker')->attempt($credentials, $request->filled('remember'))) {
             $request->session()->regenerate();
-            return redirect()->intended('/seeker/dashboard');
+
+            $redirect = $this->safeRedirect($request->input('redirect'));
+            if ($redirect) {
+                return redirect($redirect);
+            }
+
+            return redirect()->intended(route('seeker.dashboard'));
         }
 
         throw ValidationException::withMessages([
@@ -44,7 +53,7 @@ class SeekerAuthController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:seekers',
             'password' => 'required|string|min:8|confirmed',
-            'phone' => 'nullable|string|max:20',
+            'phone' => 'required|string|max:20',
         ]);
 
         $seeker = Seeker::create([
@@ -56,7 +65,12 @@ class SeekerAuthController extends Controller
 
         Auth::guard('seeker')->login($seeker);
 
-        return redirect('/seeker/dashboard');
+        $redirect = $this->safeRedirect($request->input('redirect'));
+        if ($redirect) {
+            return redirect($redirect);
+        }
+
+        return redirect(route('seeker.dashboard'));
     }
 
     public function logout(Request $request)
@@ -65,6 +79,15 @@ class SeekerAuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         return redirect('/seeker/login');
+    }
+
+    protected function safeRedirect(?string $redirect): ?string
+    {
+        if ($redirect && Str::startsWith($redirect, '/')) {
+            return $redirect;
+        }
+
+        return null;
     }
 }
 

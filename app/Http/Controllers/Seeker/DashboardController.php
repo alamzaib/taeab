@@ -11,7 +11,19 @@ class DashboardController extends Controller
     public function index()
     {
         $seeker = Auth::guard('seeker')->user();
-        return view('seeker.dashboard', compact('seeker'));
+
+        $stats = [
+            'applications' => $seeker->applications()->count(),
+            'favorites' => $seeker->favorites()->count(),
+        ];
+
+        $favorites = $seeker->favorites()
+            ->with('job.company')
+            ->latest()
+            ->take(3)
+            ->get();
+
+        return view('seeker.dashboard', compact('seeker', 'stats', 'favorites'));
     }
 }
 

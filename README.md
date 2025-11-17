@@ -17,6 +17,7 @@ A comprehensive job portal application built with Laravel featuring multi-authen
 - **Job Module**: Admin, company, and agent job creation with bulk import
 - **Static Pages**: Admin can create pages like About, Terms, Privacy with custom meta tags
 - **LinkedIn Login**: Seekers can sign in/sign up using their LinkedIn account
+- **Seeker Document Manager**: Upload multiple CVs and cover letters, set defaults, reuse them when applying
 
 ## Installation
 
@@ -63,6 +64,12 @@ php artisan migrate
    ```bash
    php artisan serve
    ```
+
+7. **Run Latest Migrations**
+   ```bash
+   php artisan migrate
+   ```
+   This will create the jobs, pages, job documents, and job applications tables used by the new features.
 
 ### LinkedIn Social Login Setup (Seeker Accounts)
 
@@ -164,6 +171,13 @@ Import UI is available at `/admin/jobs/import`.
 - Agents can post jobs on behalf of any company at `/agent/jobs`
 - Each job is tied to the agent account for tracking
 - Dashboard shows job totals and quick job management links
+
+## Seeker Documents & Applications
+
+- Manage resumes and cover letters from the seeker dashboard at `/seeker/documents`
+- Upload PDF, DOC, or DOCX files (up to 5 MB), keep multiple versions, and mark one default per type
+- Job applications automatically attach the default resume/cover-letter if available
+- Applying from `/jobs/{slug}` prompts unauthenticated users to log in with SweetAlert and prevents duplicate submissions
 
 ## Static Pages
 

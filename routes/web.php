@@ -8,21 +8,37 @@ use App\Http\Controllers\Auth\AdminAuthController;
 use App\Http\Controllers\Agent\DashboardController as AgentDashboardController;
 use App\Http\Controllers\Agent\JobController as AgentJobController;
 use App\Http\Controllers\Seeker\DashboardController as SeekerDashboardController;
+use App\Http\Controllers\Seeker\ProfileController as SeekerProfileController;
 use App\Http\Controllers\Company\DashboardController as CompanyDashboardController;
 use App\Http\Controllers\Company\JobController as CompanyJobController;
+use App\Http\Controllers\Company\ProfileController as CompanyProfileController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\JobController as AdminJobController;
 use App\Http\Controllers\Admin\PageController as AdminPageController;
+use App\Http\Controllers\JobApplicationController;
+use App\Http\Controllers\JobListingController;
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\Seeker\DocumentController;
+use App\Http\Controllers\Agent\ProfileController as AgentProfileController;
+use App\Http\Controllers\CompanyListingController;
 
 // Home page
 Route::get('/', function () {
     return view('home');
 });
 
+Route::get('/jobs', [JobListingController::class, 'index'])->name('jobs.index');
+Route::get('/companies', [CompanyListingController::class, 'index'])->name('companies.index');
+Route::get('/companies/{company}', [CompanyListingController::class, 'show'])->name('companies.show');
+
 // Static Pages
 Route::redirect('/pages', '/pages/about');
 Route::get('/pages/{slug}', [PageController::class, 'show'])->name('pages.show');
+
+Route::get('/jobs/{slug}', [JobListingController::class, 'show'])->name('jobs.show');
+Route::get('/jobs/{slug}/apply', [JobApplicationController::class, 'create'])->middleware('auth:seeker')->name('jobs.apply.form');
+Route::post('/jobs/{slug}/apply', [JobApplicationController::class, 'store'])->middleware('auth:seeker')->name('jobs.apply');
+Route::post('/jobs/{slug}/favorite', [JobListingController::class, 'toggleFavorite'])->middleware('auth:seeker')->name('jobs.favorite');
 
 Route::fallback(function () {
     return response()->view('errors.404', [], 404);
@@ -38,6 +54,8 @@ Route::prefix('agent')->group(function () {
     
     Route::middleware('auth:agent')->group(function () {
         Route::get('/dashboard', [AgentDashboardController::class, 'index'])->name('agent.dashboard');
+        Route::get('/profile/edit', [AgentProfileController::class, 'edit'])->name('agent.profile.edit');
+        Route::post('/profile', [AgentProfileController::class, 'update'])->name('agent.profile.update');
         Route::resource('jobs', AgentJobController::class)->except(['show'])->names([
             'index' => 'agent.jobs.index',
             'create' => 'agent.jobs.create',
@@ -58,9 +76,16 @@ Route::prefix('seeker')->group(function () {
     Route::post('/logout', [SeekerAuthController::class, 'logout'])->name('seeker.logout');
     Route::get('/login/linkedin', [App\Http\Controllers\Auth\SeekerLinkedInController::class, 'redirect'])->name('seeker.login.linkedin');
     Route::get('/login/linkedin/callback', [App\Http\Controllers\Auth\SeekerLinkedInController::class, 'callback'])->name('seeker.login.linkedin.callback');
+    Route::view('/password/reset', 'auth.seeker.reset-password')->name('seeker.password.reset');
     
     Route::middleware('auth:seeker')->group(function () {
         Route::get('/dashboard', [SeekerDashboardController::class, 'index'])->name('seeker.dashboard');
+        Route::get('/profile/edit', [SeekerProfileController::class, 'edit'])->name('seeker.profile.edit');
+        Route::post('/profile', [SeekerProfileController::class, 'update'])->name('seeker.profile.update');
+        Route::get('/documents', [DocumentController::class, 'index'])->name('seeker.documents.index');
+        Route::post('/documents', [DocumentController::class, 'store'])->name('seeker.documents.store');
+        Route::delete('/documents/{document}', [DocumentController::class, 'destroy'])->name('seeker.documents.destroy');
+        Route::post('/documents/{document}/default', [DocumentController::class, 'makeDefault'])->name('seeker.documents.make-default');
     });
 });
 
@@ -74,6 +99,8 @@ Route::prefix('company')->group(function () {
     
     Route::middleware('auth:company')->group(function () {
         Route::get('/dashboard', [CompanyDashboardController::class, 'index'])->name('company.dashboard');
+        Route::get('/profile/edit', [CompanyProfileController::class, 'edit'])->name('company.profile.edit');
+        Route::post('/profile', [CompanyProfileController::class, 'update'])->name('company.profile.update');
         Route::resource('jobs', CompanyJobController::class)->except(['show'])->names([
             'index' => 'company.jobs.index',
             'create' => 'company.jobs.create',

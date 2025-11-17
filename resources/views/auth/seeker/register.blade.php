@@ -3,63 +3,65 @@
 @section('title', 'Job Seeker Register - Job Portal UAE')
 
 @section('content')
-<div class="container">
-    <div class="card" style="max-width: 500px; margin: 50px auto;">
-        <h2 class="primary-text" style="margin-bottom: 20px; font-size: 28px;">Job Seeker Registration</h2>
-        
-        @if ($errors->any())
-            <div class="alert alert-danger">
-                <ul style="margin: 0; padding-left: 20px;">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
+<div class="auth-wrapper">
+    <div class="auth-card">
+        <div class="auth-panel">
+            <h2 class="primary-text">Create your seeker account</h2>
+            <p class="subtext">Email, phone number, and password are mandatory so employers can reach you.</p>
 
-        <form method="POST" action="{{ route('seeker.register') }}">
-            @csrf
-            <div class="form-group">
-                <label for="name">Full Name</label>
-                <input type="text" id="name" name="name" class="form-control" value="{{ old('name') }}" required autofocus>
-            </div>
+            @if ($errors->any())
+                <div class="alert alert-danger">
+                    <ul style="margin: 0; padding-left: 20px;">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
 
-            <div class="form-group">
-                <label for="email">Email Address</label>
-                <input type="email" id="email" name="email" class="form-control" value="{{ old('email') }}" required>
-            </div>
-
-            <div class="form-group">
-                <label for="phone">Phone Number</label>
-                <input type="text" id="phone" name="phone" class="form-control" value="{{ old('phone') }}">
-            </div>
-
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" class="form-control" required>
-            </div>
-
-            <div class="form-group">
-                <label for="password_confirmation">Confirm Password</label>
-                <input type="password" id="password_confirmation" name="password_confirmation" class="form-control" required>
-            </div>
-
-            <div class="form-group">
-                <button type="submit" class="btn-primary" style="width: 100%;">Register</button>
-            </div>
-
-            <div style="text-align: center; margin-top: 15px;">
-                <p>Already have an account? <a href="{{ route('seeker.login') }}" class="primary-text">Login here</a></p>
-            </div>
-        </form>
-
-        <div style="text-align: center; margin-top: 30px;">
-            <hr style="margin: 25px 0;">
-            <p style="margin-bottom: 15px;">or sign up with</p>
-            <a href="{{ route('seeker.login.linkedin') }}" class="btn-secondary" style="width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 10px;">
-                <img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/linkedin.svg" alt="LinkedIn" style="width: 18px; filter: invert(100%);">
-                Continue with LinkedIn
+            <a href="{{ route('seeker.login.linkedin') }}" class="social-button">
+                <img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/linkedin.svg" alt="LinkedIn">
+                Sign up with LinkedIn
             </a>
+
+            <form method="POST" action="{{ route('seeker.register') }}">
+                @csrf
+                <input type="hidden" name="redirect" value="{{ request('redirect') }}">
+                <div class="auth-input">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" name="name" value="{{ old('name') }}" required autofocus>
+                </div>
+                <div class="auth-input">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" value="{{ old('email') }}" required>
+                </div>
+                <div class="auth-input">
+                    <label for="phone">Phone Number</label>
+                    <input type="text" id="phone" name="phone" value="{{ old('phone') }}" required>
+                </div>
+                <div class="auth-dual">
+                    <div class="auth-input">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+                    <div class="auth-input">
+                        <label for="password_confirmation">Confirm Password</label>
+                        <input type="password" id="password_confirmation" name="password_confirmation" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary" style="width:100%; margin-top:20px;">Create Account</button>
+            </form>
+        </div>
+        <div class="auth-side">
+            <h3>Why join Job Portal UAE?</h3>
+            <p>Thousands of curated roles, CV and cover-letter management, and transparent application tracking.</p>
+            <ul style="margin:0; padding-left:18px;">
+                <li>Single profile, endless opportunities</li>
+                <li>Save multiple CVs & cover letters</li>
+                <li>Real-time application status</li>
+            </ul>
+            <a href="{{ route('seeker.login', ['redirect' => request('redirect')]) }}" class="btn"
+                style="background:white; color:#235181; text-align:center; margin-top:15px;">Already registered?</a>
         </div>
     </div>
 </div>

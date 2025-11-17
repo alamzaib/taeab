@@ -20,6 +20,15 @@ class Company extends Authenticatable
         'industry',
         'website',
         'status',
+        'logo_path',
+        'banner_path',
+        'address',
+        'city',
+        'country',
+        'latitude',
+        'longitude',
+        'organization_type',
+        'about',
     ];
 
     protected $hidden = [
