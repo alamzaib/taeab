@@ -10,15 +10,21 @@
         $metaTitle = !empty($settings['meta_title']) ? $settings['meta_title'] : 'Job Portal UAE';
         $metaDescription = $settings['meta_description'] ?? '';
         $metaKeywords = $settings['meta_keywords'] ?? '';
+        $metaDescriptionSection = trim($__env->yieldContent('meta_description'));
+        $metaKeywordsSection = trim($__env->yieldContent('meta_keywords'));
     @endphp
     
     <title>@yield('title', $metaTitle)</title>
     
-    @if(!empty($metaDescription))
+    @if(!empty($metaDescriptionSection))
+    <meta name="description" content="{{ $metaDescriptionSection }}">
+    @elseif(!empty($metaDescription))
     <meta name="description" content="{{ $metaDescription }}">
     @endif
     
-    @if(!empty($metaKeywords))
+    @if(!empty($metaKeywordsSection))
+    <meta name="keywords" content="{{ $metaKeywordsSection }}">
+    @elseif(!empty($metaKeywords))
     <meta name="keywords" content="{{ $metaKeywords }}">
     @endif
     
@@ -76,6 +82,33 @@
         .btn-primary:hover {
             background-color: #1a3d63;
         }
+        .btn {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: #545b62;
+        }
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+        .btn-sm {
+            padding: 6px 10px;
+            font-size: 12px;
+        }
         .container {
             max-width: 1200px;
             margin: 0 auto;
@@ -87,6 +120,33 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             padding: 30px;
             margin: 20px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table th, table td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+        table th {
+            text-align: left;
+            color: #235181;
+            font-weight: 600;
+        }
+        .page-content {
+            line-height: 1.7;
+            color: #333;
+        }
+        .page-content img {
+            max-width: 100%;
+            height: auto;
+        }
+        .page-content h2,
+        .page-content h3,
+        .page-content h4 {
+            color: #235181;
+            margin-top: 20px;
         }
         .navbar {
             background-color: #235181;
@@ -124,6 +184,15 @@
         .form-group {
             margin-bottom: 20px;
         }
+        .form-row {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .form-row .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
         .form-group label {
             display: block;
             margin-bottom: 5px;
@@ -157,6 +226,16 @@
             color: #155724;
             border: 1px solid #c3e6cb;
         }
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            font-size: 12px;
+            border-radius: 999px;
+            color: white;
+        }
+        .badge-success { background-color: #28a745; }
+        .badge-warning { background-color: #ffc107; color: #212529; }
+        .badge-secondary { background-color: #6c757d; }
     </style>
     @stack('styles')
 </head>

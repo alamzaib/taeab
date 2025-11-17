@@ -14,6 +14,9 @@ A comprehensive job portal application built with Laravel featuring multi-authen
 - **Modern UI**: Beautiful interface with custom color scheme (#235181)
 - **Job Portal**: Designed specifically for the UAE job market
 - **Admin Settings Panel**: Comprehensive settings management for logos, SEO, analytics, and contact information
+- **Job Module**: Admin, company, and agent job creation with bulk import
+- **Static Pages**: Admin can create pages like About, Terms, Privacy with custom meta tags
+- **LinkedIn Login**: Seekers can sign in/sign up using their LinkedIn account
 
 ## Installation
 
@@ -45,6 +48,11 @@ A comprehensive job portal application built with Laravel featuring multi-authen
    php artisan migrate
    ```
 
+If you added the project before this update, run the migrations again to create the `jobs` table:
+```bash
+php artisan migrate
+```
+
 5. **Create Storage Link**
    ```bash
    php artisan storage:link
@@ -54,6 +62,21 @@ A comprehensive job portal application built with Laravel featuring multi-authen
 6. **Start Development Server**
    ```bash
    php artisan serve
+   ```
+
+### LinkedIn Social Login Setup (Seeker Accounts)
+
+1. Install Socialite if you haven't yet:
+   ```bash
+   composer install
+   ```
+   (Already included in `composer.json`; run `composer update` if needed.)
+2. Create a LinkedIn OAuth app and set the redirect URI to `https://your-domain.com/seeker/login/linkedin/callback`.
+3. Add the credentials to `.env`:
+   ```env
+   LINKEDIN_CLIENT_ID=your-linkedin-app-id
+   LINKEDIN_CLIENT_SECRET=your-linkedin-app-secret
+   LINKEDIN_REDIRECT_URI=https://your-domain.com/seeker/login/linkedin/callback
    ```
 
 ## User Types & Routes
@@ -114,6 +137,41 @@ php artisan db:seed
 - **Job Categories**: Popular job categories with quick links
 - **Footer**: Logo, quick links, employer links, social media icons, contact information, and copyright
 
+## Job Module
+
+### Admin
+- Manage all jobs from `/admin/jobs`
+- Assign jobs to any company and optionally to an agent
+- Bulk import jobs from CSV
+- Publish, draft, or close jobs
+
+#### CSV Import Format
+Upload a `.csv` file with the following headers (lowercase, in order):
+```
+title,company_email,location,job_type,status,salary_min,salary_max,short_description,description
+```
+- `company_email` must match an existing company account  
+- `status` must be `draft`, `published`, or `closed`
+
+Import UI is available at `/admin/jobs/import`.
+
+### Company Dashboard
+- Companies can post, edit, and delete their own jobs at `/company/jobs`
+- Quick links on the dashboard for posting and managing jobs
+- Stats for total and active jobs
+
+### Agent Dashboard
+- Agents can post jobs on behalf of any company at `/agent/jobs`
+- Each job is tied to the agent account for tracking
+- Dashboard shows job totals and quick job management links
+
+## Static Pages
+
+- Manage page content at `/admin/pages`
+- Fields include title, slug, status (draft/published), full content, meta title, and meta description
+- Pages can be published for seekers via `/pages/{slug}` (e.g. `/pages/about-us`)
+- Useful for About, Terms & Conditions, Privacy Policy, FAQ, etc.
+
 ## Admin Settings
 
 The admin panel includes comprehensive settings management:
@@ -160,9 +218,9 @@ The application uses a custom color scheme:
 ## Next Steps
 
 1. Add job posting functionality
-2. Implement application management
+2. Implement application management and seeker job applications
 3. Add resume upload for seekers
-4. Implement search and filtering functionality
+4. Implement advanced search and filtering
 5. Add job categories and tags
 6. Integrate maps using latitude/longitude from settings
 

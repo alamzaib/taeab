@@ -52,6 +52,15 @@
                 <p>Already have an account? <a href="{{ route('seeker.login') }}" class="primary-text">Login here</a></p>
             </div>
         </form>
+
+        <div style="text-align: center; margin-top: 30px;">
+            <hr style="margin: 25px 0;">
+            <p style="margin-bottom: 15px;">or sign up with</p>
+            <a href="{{ route('seeker.login.linkedin') }}" class="btn-secondary" style="width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 10px;">
+                <img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/linkedin.svg" alt="LinkedIn" style="width: 18px; filter: invert(100%);">
+                Continue with LinkedIn
+            </a>
+        </div>
     </div>
 </div>
 @endsection

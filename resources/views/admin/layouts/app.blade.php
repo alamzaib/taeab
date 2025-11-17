@@ -105,6 +105,22 @@
                         </li>
 
                         <li class="nav-item">
+                            <a href="{{ route('admin.jobs.index') }}"
+                                class="nav-link {{ request()->is('admin/jobs*') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-briefcase"></i>
+                                <p>Jobs</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="{{ route('admin.pages.index') }}"
+                                class="nav-link {{ request()->is('admin/pages*') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-file-alt"></i>
+                                <p>Pages</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
                             <a href="#" class="nav-link {{ request()->is('admin/users*') ? 'active' : '' }}">
                                 <i class="nav-icon fas fa-users"></i>
                                 <p>
