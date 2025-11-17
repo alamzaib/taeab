@@ -8,11 +8,6 @@ use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('auth:agent');
-    }
-
     public function index()
     {
         $agent = Auth::guard('agent')->user();

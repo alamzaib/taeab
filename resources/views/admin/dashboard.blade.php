@@ -1,42 +1,85 @@
-@extends('layouts.app')
+@extends('admin.layouts.app')
 
-@section('title', 'Admin Dashboard - Job Portal UAE')
+@section('title', 'Admin Dashboard')
+@section('page-title', 'Dashboard')
+
+@section('breadcrumb')
+    <li class="breadcrumb-item active">Dashboard</li>
+@endsection
 
 @section('content')
-    <div class="container">
-        <div class="card">
-            <h1 class="primary-text" style="font-size: 32px; margin-bottom: 10px;">Admin Dashboard</h1>
-            <p style="color: #666; margin-bottom: 30px;">Welcome, {{ $admin->name }}!</p>
-
-            <div
-                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 30px;">
-                <div class="card" style="background: linear-gradient(135deg, #235181 0%, #1a3d63 100%); color: white;">
-                    <h3 style="margin-bottom: 10px;">Total Users</h3>
-                    <p style="font-size: 36px; font-weight: bold;">0</p>
-                </div>
-                <div class="card" style="background: linear-gradient(135deg, #235181 0%, #1a3d63 100%); color: white;">
-                    <h3 style="margin-bottom: 10px;">Total Jobs</h3>
-                    <p style="font-size: 36px; font-weight: bold;">0</p>
-                </div>
-                <div class="card" style="background: linear-gradient(135deg, #235181 0%, #1a3d63 100%); color: white;">
-                    <h3 style="margin-bottom: 10px;">Total Companies</h3>
-                    <p style="font-size: 36px; font-weight: bold;">0</p>
-                </div>
-                <div class="card" style="background: linear-gradient(135deg, #235181 0%, #1a3d63 100%); color: white;">
-                    <h3 style="margin-bottom: 10px;">Total Applications</h3>
-                    <p style="font-size: 36px; font-weight: bold;">0</p>
-                </div>
+<div class="row">
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-info">
+            <div class="inner">
+                <h3>{{ \App\Models\Seeker::count() }}</h3>
+                <p>Job Seekers</p>
             </div>
+            <div class="icon">
+                <i class="fas fa-user-tie"></i>
+            </div>
+            <a href="{{ route('admin.users.seekers.index') }}" class="small-box-footer">
+                More info <i class="fas fa-arrow-circle-right"></i>
+            </a>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-success">
+            <div class="inner">
+                <h3>{{ \App\Models\Agent::count() }}</h3>
+                <p>Agents</p>
+            </div>
+            <div class="icon">
+                <i class="fas fa-user-cog"></i>
+            </div>
+            <a href="{{ route('admin.users.agents.index') }}" class="small-box-footer">
+                More info <i class="fas fa-arrow-circle-right"></i>
+            </a>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-warning">
+            <div class="inner">
+                <h3>{{ \App\Models\Company::count() }}</h3>
+                <p>Companies</p>
+            </div>
+            <div class="icon">
+                <i class="fas fa-building"></i>
+            </div>
+            <a href="{{ route('admin.users.companies.index') }}" class="small-box-footer">
+                More info <i class="fas fa-arrow-circle-right"></i>
+            </a>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-danger">
+            <div class="inner">
+                <h3>0</h3>
+                <p>Total Jobs</p>
+            </div>
+            <div class="icon">
+                <i class="fas fa-briefcase"></i>
+            </div>
+            <a href="#" class="small-box-footer">
+                More info <i class="fas fa-arrow-circle-right"></i>
+            </a>
+        </div>
+    </div>
+</div>
 
-            <div style="margin-top: 30px;">
-                <h2 class="primary-text" style="margin-bottom: 20px;">Quick Actions</h2>
-                <div style="display: flex; gap: 15px; flex-wrap: wrap;">
-                    <a href="#" class="btn-primary">Manage Users</a>
-                    <a href="#" class="btn-primary">Manage Jobs</a>
-                    <a href="#" class="btn-primary">Manage Companies</a>
-                    <a href="{{ route('admin.settings.index') }}" class="btn-primary">System Settings</a>
-                </div>
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Welcome, {{ $admin->name }}!</h3>
+            </div>
+            <div class="card-body">
+                <p>Welcome to the Admin Dashboard. Use the sidebar menu to navigate and manage the system.</p>
             </div>
         </div>
     </div>
+</div>
 @endsection

@@ -1,28 +1,20 @@
-@extends('layouts.app')
+@extends('admin.layouts.app')
 
-@section('title', 'Settings - Admin Dashboard')
+@section('title', 'Settings')
+@section('page-title', 'Application Settings')
+
+@section('breadcrumb')
+    <li class="breadcrumb-item"><a href="{{ route('admin.settings.index') }}">Settings</a></li>
+    <li class="breadcrumb-item active">General</li>
+@endsection
 
 @section('content')
-<div class="container">
-    <div class="card">
-        <h1 class="primary-text" style="font-size: 32px; margin-bottom: 30px;">Application Settings</h1>
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Application Settings</h3>
+    </div>
 
-        @if(session('success'))
-            <div class="alert alert-success" style="margin-bottom: 20px;">
-                {{ session('success') }}
-            </div>
-        @endif
-
-        @if ($errors->any())
-            <div class="alert alert-danger" style="margin-bottom: 20px;">
-                <ul style="margin: 0; padding-left: 20px;">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
-
+    <div class="card-body">
         <form method="POST" action="{{ route('admin.settings.update') }}" enctype="multipart/form-data">
             @csrf
 
@@ -166,12 +158,12 @@
                 </div>
             </div>
 
-            <div class="form-group" style="margin-top: 30px;">
-                <button type="submit" class="btn-primary">Save Settings</button>
-                <a href="{{ route('admin.dashboard') }}" class="btn-secondary" style="margin-left: 10px;">Cancel</a>
-            </div>
-        </form>
-    </div>
+        </div>
+        <div class="card-footer">
+            <button type="submit" class="btn btn-primary">Save Settings</button>
+            <a href="{{ route('admin.dashboard') }}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
 </div>
 
 <style>
