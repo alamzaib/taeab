@@ -31,7 +31,10 @@ class UserController extends Controller
             $query->where('status', $request->status);
         }
 
-        $seekers = $query->latest()->paginate(15);
+        $seekers = $query
+            ->orderByDesc('profile_refreshed_at')
+            ->orderByDesc('updated_at')
+            ->paginate(15);
         return view('admin.users.seekers.index', compact('seekers'));
     }
 

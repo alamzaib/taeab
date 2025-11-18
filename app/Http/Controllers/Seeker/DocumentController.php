@@ -26,6 +26,7 @@ class DocumentController extends Controller
 
         $validated = $request->validate([
             'type' => 'required|in:resume,cover_letter',
+            'title' => 'required|string|max:255',
             'file' => 'required|file|mimes:pdf,doc,docx|max:5120',
             'set_default' => 'sometimes|boolean',
         ]);
@@ -47,6 +48,7 @@ class DocumentController extends Controller
 
         $seeker->documents()->create([
             'type' => $validated['type'],
+            'title' => $validated['title'],
             'file_name' => $file->getClientOriginalName(),
             'file_path' => $path,
             'mime_type' => $file->getClientMimeType(),

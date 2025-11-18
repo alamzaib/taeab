@@ -7,6 +7,7 @@ use App\Models\JobDocument;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class JobApplication extends Model
 {
@@ -39,6 +40,11 @@ class JobApplication extends Model
     public function coverLetterDocument(): BelongsTo
     {
         return $this->belongsTo(JobDocument::class, 'cover_letter_document_id');
+    }
+
+    public function messages(): HasMany
+    {
+        return $this->hasMany(JobApplicationMessage::class);
     }
 }
 

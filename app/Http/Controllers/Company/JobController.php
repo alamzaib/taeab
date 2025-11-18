@@ -21,13 +21,14 @@ class JobController extends Controller
 
         $jobs = $query->paginate(15)->withQueryString();
 
-        return view('company.jobs.index', compact('jobs'));
+        return view('company.jobs.index', compact('jobs', 'company'));
     }
 
     public function create()
     {
         $job = new Job();
-        return view('company.jobs.create', compact('job'));
+        $company = auth('company')->user();
+        return view('company.jobs.create', compact('job', 'company'));
     }
 
     public function store(Request $request)
@@ -50,7 +51,8 @@ class JobController extends Controller
     public function edit(Job $job)
     {
         $this->authorizeJob($job);
-        return view('company.jobs.edit', compact('job'));
+        $company = auth('company')->user();
+        return view('company.jobs.edit', compact('job', 'company'));
     }
 
     public function update(Request $request, Job $job)

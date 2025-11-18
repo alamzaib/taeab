@@ -90,13 +90,11 @@
             </div>
         @endif
 
-        <div style="margin-top: 40px; border-top: 1px solid #e5e7eb; padding-top: 25px;">
-            <h2 class="primary-text" style="font-size: 24px; margin-bottom: 15px;">Apply for this job</h2>
+        @if(!($isSeeker && $hasApplied))
+            <div style="margin-top: 40px; border-top: 1px solid #e5e7eb; padding-top: 25px;">
+                <h2 class="primary-text" style="font-size: 24px; margin-bottom: 15px;">Apply for this job</h2>
 
-            @if($isSeeker)
-                @if($hasApplied)
-                    <div class="alert alert-success">You have already applied for this job.</div>
-                @else
+                @if($isSeeker)
                     <div class="card" style="margin-bottom: 20px; background-color: #f8fafc;">
                         <h3 class="primary-text" style="margin-bottom: 10px;">Your default documents</h3>
                         <ul style="list-style: none; padding-left: 0; margin-bottom: 0;">
@@ -123,11 +121,11 @@
                         </ul>
                     </div>
                     <a href="{{ route('jobs.apply.form', $job->slug) }}" class="btn-primary">Proceed to Application</a>
+                @else
+                    <button id="apply-btn" class="btn-primary">Apply Now</button>
                 @endif
-            @else
-                <button id="apply-btn" class="btn-primary">Apply Now</button>
-            @endif
-        </div>
+            </div>
+        @endif
     </div>
 </div>
 @endsection

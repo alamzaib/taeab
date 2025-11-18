@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Facades\Storage;
 
 class Seeker extends Authenticatable
 {
@@ -32,6 +31,8 @@ class Seeker extends Authenticatable
         'whatsapp_number',
         'resume',
         'status',
+        'profile_refreshed_at',
+        'unique_code',
     ];
 
     protected $hidden = [
@@ -49,7 +50,27 @@ class Seeker extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'profile_refreshed_at' => 'datetime',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::creating(function (self $seeker) {
+            if (empty($seeker->unique_code)) {
+                $seeker->unique_code = static::generateUniqueCode();
+            }
+
+            if (empty($seeker->profile_refreshed_at)) {
+                $seeker->profile_refreshed_at = now();
+            }
+        });
+
+        static::saving(function (self $seeker) {
+            if (empty($seeker->unique_code)) {
+                $seeker->unique_code = static::generateUniqueCode();
+            }
+        });
     }
 
     public function applications(): HasMany
@@ -69,20 +90,38 @@ class Seeker extends Authenticatable
 
     public function getProfilePhotoUrlAttribute(): string
     {
-        if ($this->profile_photo_path && Storage::disk('public')->exists($this->profile_photo_path)) {
-            return Storage::disk('public')->url($this->profile_photo_path);
+        $path = $this->normalizeStoragePath($this->profile_photo_path);
+
+        if ($path) {
+            return asset('storage/' . ltrim($path, '/'));
         }
 
-        return asset('images/avatar-placeholder.png');
+        return asset('images/avatar-placeholder.svg');
     }
 
     public function getProfileCoverStyleAttribute(): string
     {
-        if ($this->profile_cover_path && Storage::disk('public')->exists($this->profile_cover_path)) {
-            return 'url(' . Storage::disk('public')->url($this->profile_cover_path) . ') center/cover';
+        $path = $this->normalizeStoragePath($this->profile_cover_path);
+
+        if ($path) {
+            return 'url(' . asset('storage/' . ltrim($path, '/')) . ') center/cover';
         }
 
         return 'linear-gradient(135deg,#235181,#1a3d63)';
+    }
+
+    protected function normalizeStoragePath(?string $path): ?string
+    {
+        return $path ? str_replace('\\', '/', $path) : null;
+    }
+
+    public static function generateUniqueCode(): string
+    {
+        do {
+            $code = 'SE' . str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        } while (static::where('unique_code', $code)->exists());
+
+        return $code;
     }
 }
 

@@ -8,12 +8,27 @@
 
 @section('content')
 <div class="container">
+    <div style="margin-bottom:15px;">
+        <a href="{{ route('seeker.dashboard') }}" class="btn btn-secondary">← Back to dashboard</a>
+    </div>
     <div class="card" style="padding:0;">
         <div style="background:{{ $seeker->profile_cover_style }};color:white;padding:35px;border-radius:18px 18px 0 0; position:relative;">
             <div style="position:relative; z-index:2;">
                 <p style="margin:0;opacity:.8;">Profile center</p>
                 <h1 style="margin:5px 0 0;font-size:32px;">{{ $seeker->name }}</h1>
                 <p style="margin:8px 0 0;color:rgba(255,255,255,.85);">Maintain a polished profile so recruiters understand your story.</p>
+                <div style="margin-top:12px; display:flex; flex-wrap:wrap; gap:16px; align-items:center;">
+                    <span style="font-size:13px; letter-spacing:.08em; text-transform:uppercase;">Profile ID:
+                        <strong>{{ $seeker->unique_code }}</strong></span>
+                    <span style="font-size:13px;">Last refreshed:
+                        {{ optional($seeker->profile_refreshed_at)->diffForHumans() ?? 'Never' }}</span>
+                    <form action="{{ route('seeker.profile.refresh') }}" method="POST">
+                        @csrf
+                        <button type="submit" class="btn btn-sm btn-light"
+                            style="background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.4); color:white;">Refresh
+                            profile</button>
+                    </form>
+                </div>
             </div>
             <div style="position:absolute; bottom:-40px; right:35px; background:white; border-radius:50%; padding:6px; box-shadow:0 10px 30px rgba(15,23,42,0.15);">
                 <img src="{{ $seeker->profile_photo_url }}" alt="Profile Photo" style="height:80px; width:80px; border-radius:50%; object-fit:cover;">
@@ -21,10 +36,7 @@
         </div>
 
         <div style="padding:30px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:25px;">
-                <div>
-                    <a href="{{ route('seeker.dashboard') }}" class="btn btn-secondary">← Back to dashboard</a>
-                </div>
+            <div style="display:flex; justify-content:flex-end; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:25px;">
                 <div style="display:flex; gap:10px;">
                     <a href="{{ route('jobs.index') }}" class="btn btn-secondary">Browse jobs</a>
                     <a href="{{ route('seeker.documents.index') }}" class="btn btn-secondary">Documents</a>

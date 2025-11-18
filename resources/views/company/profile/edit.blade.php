@@ -7,27 +7,37 @@
 @section('title', 'Edit Company Profile')
 
 @section('content')
-<div class="container">
-    <div class="card" style="max-width: 720px; margin: 30px auto;">
-        <h1 class="primary-text" style="font-size: 30px; margin-bottom: 10px;">Company Profile</h1>
-        <p style="color:#6b7280; margin-bottom: 20px;">Update your organization details and account credentials.</p>
+<div class="container company-dashboard">
+    <div class="card" style="padding:0; overflow:hidden;">
+        @include('company.components.hero', [
+            'heroTitle' => 'Refresh your brand presence',
+            'heroDescription' => 'Update contact points, brand assets, and location details so seekers trust your organisation instantly.',
+            'heroActions' => [
+                ['label' => 'Manage jobs', 'route' => route('company.jobs.index'), 'variant' => 'ghost'],
+                ['label' => 'Applicants inbox', 'route' => route('company.applications.index'), 'variant' => 'ghost'],
+            ],
+            'stats' => ['active_jobs' => $company->jobs()->where('status', 'published')->count()]
+        ])
 
-        @if(session('success'))
-            <div class="alert alert-success">{{ session('success') }}</div>
-        @endif
-
-        @if ($errors->any())
-            <div class="alert alert-danger">
-                <ul style="margin: 0; padding-left: 20px;">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
-
+        <div style="display:flex; flex-wrap:wrap;">
+            @include('company.components.sidebar')
+            <div style="flex:1; padding:32px;">
         <form action="{{ route('company.profile.update') }}" method="POST" enctype="multipart/form-data">
             @csrf
+            <div style="display:grid; gap:24px;">
+            @if(session('success'))
+                <div class="alert alert-success">{{ session('success') }}</div>
+            @endif
+
+            @if ($errors->any())
+                <div class="alert alert-danger">
+                    <ul style="margin: 0; padding-left: 20px;">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
             <div class="auth-dual">
                 <div class="form-group">
                     <label for="name">Contact Name</label>
@@ -137,6 +147,8 @@
                 <button type="submit" class="btn-primary">Save Changes</button>
             </div>
         </form>
+            </div>
+        </div>
     </div>
 </div>
 @endsection

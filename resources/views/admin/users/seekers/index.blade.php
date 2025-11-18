@@ -43,19 +43,19 @@
         <table class="table table-bordered table-striped">
             <thead>
                 <tr>
-                    <th>ID</th>
+                    <th>Code</th>
                     <th>Name</th>
                     <th>Email</th>
                     <th>Phone</th>
                     <th>Status</th>
-                    <th>Created At</th>
+                    <th>Last Refresh</th>
                     <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($seekers as $seeker)
                 <tr>
-                    <td>{{ $seeker->id }}</td>
+                    <td><span class="badge badge-info">{{ $seeker->unique_code }}</span></td>
                     <td>{{ $seeker->name }}</td>
                     <td>{{ $seeker->email }}</td>
                     <td>{{ $seeker->phone ?? 'N/A' }}</td>
@@ -64,7 +64,13 @@
                             {{ ucfirst($seeker->status) }}
                         </span>
                     </td>
-                    <td>{{ $seeker->created_at->format('M d, Y') }}</td>
+                    <td>
+                        @if($seeker->profile_refreshed_at)
+                            {{ $seeker->profile_refreshed_at->diffForHumans() }}
+                        @else
+                            <span class="text-muted">Never</span>
+                        @endif
+                    </td>
                     <td>
                         <a href="{{ route('admin.users.seekers.edit', $seeker) }}" class="btn btn-sm btn-info">
                             <i class="fas fa-edit"></i>

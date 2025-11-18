@@ -3,65 +3,93 @@
 @section('title', 'Company Dashboard - Job Portal UAE')
 
 @section('content')
-<div class="container">
-    <div class="card" style="padding:0;">
-        <div style="position:relative; background:{{ $company->banner_path ? 'url('.Storage::disk('public')->url($company->banner_path).') center/cover' : 'linear-gradient(135deg,#0f4c75,#073046)' }};color:white;padding:30px;border-radius:18px 18px 0 0;">
-            <div style="position:relative; z-index:2;">
-                <p style="margin:0;opacity:.8;">Welcome back,</p>
-                <h1 style="margin:5px 0 0;font-size:32px;">{{ $company->company_name }}</h1>
-                <p style="margin:8px 0 0;color:rgba(255,255,255,.85);">Monitor hiring performance and launch new roles faster.</p>
-            </div>
-            @if($company->logo_path)
-                <div style="position:absolute; bottom:-35px; right:30px; background:white; border-radius:12px; padding:8px; box-shadow:0 15px 40px rgba(15,23,42,0.2);">
-                    <img src="{{ Storage::disk('public')->url($company->logo_path) }}" alt="Logo" style="height:70px; width:auto;">
-                </div>
-            @endif
-        </div>
+@php
+    use Illuminate\Support\Facades\Storage;
+    $activeTab = request()->get('tab', 'overview');
+@endphp
+<div class="container company-dashboard" style="max-width:1400px;">
+    <div class="card" style="padding:0; overflow:hidden;">
+        @include('company.components.hero', [
+            'heroTitle' => $company->company_name,
+            'heroDescription' => 'Track active mandates, meet promising talent, and keep leadership in the loop from one streamlined workspace.',
+            'heroActions' => [
+                ['label' => 'Post new job', 'route' => route('company.jobs.create'), 'variant' => 'primary'],
+                ['label' => 'View applicants', 'route' => route('company.dashboard', ['tab' => 'applications']), 'variant' => 'ghost'],
+            ],
+            'stats' => $stats
+        ])
 
-        <div style="padding:30px;display:grid;gap:20px;">
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:15px;">
-                <div class="card" style="background:#e0f2fe;">
-                    <p style="color:#0369a1;margin-bottom:6px;">Active jobs</p>
-                    <p style="font-size:32px;font-weight:700;color:#0c4a6e;">{{ $stats['active_jobs'] }}</p>
-                </div>
-                <div class="card" style="background:#fef3c7;">
-                    <p style="color:#b45309;margin-bottom:6px;">Total jobs</p>
-                    <p style="font-size:32px;font-weight:700;color:#92400e;">{{ $stats['total_jobs'] }}</p>
-                </div>
-                <div class="card" style="background:#ede9fe;">
-                    <p style="color:#6d28d9;margin-bottom:6px;">Interviews scheduled</p>
-                    <p style="font-size:32px;font-weight:700;color:#5b21b6;">5</p>
-                </div>
-            </div>
-
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:15px;">
-                <div class="card" style="border:1px dashed #d1d5db;">
-                    <h3 class="primary-text" style="margin-bottom:8px;">Post a job</h3>
-                    <p style="color:#6b7280;">Launch a new vacancy with your saved templates.</p>
-                    <a href="{{ route('company.jobs.create') }}" class="btn-primary" style="margin-top:10px;">Create listing</a>
-                </div>
-                <div class="card" style="border:1px dashed #d1d5db;">
-                    <h3 class="primary-text" style="margin-bottom:8px;">Manage listings</h3>
-                    <p style="color:#6b7280;">Edit descriptions, review applicants, and close filled roles.</p>
-                    <a href="{{ route('company.jobs.index') }}" class="btn-primary" style="margin-top:10px;">View jobs</a>
-                </div>
-                <div class="card" style="border:1px dashed #d1d5db;">
-                    <h3 class="primary-text" style="margin-bottom:8px;">Company profile</h3>
-                    <p style="color:#6b7280;">Keep brand, website, and contact information up to date.</p>
-                    <a href="{{ route('company.profile.edit') }}" class="btn-primary" style="margin-top:10px;">Update profile</a>
-                </div>
+        <div style="display:flex; min-height:600px;">
+            <!-- Left Sidebar Menu -->
+            <div style="width:280px; background:#f8fafc; border-right:1px solid #e2e8f0; padding:24px 0;">
+                <nav style="display:flex; flex-direction:column; gap:4px;">
+                    <a href="{{ route('company.dashboard', ['tab' => 'overview']) }}" class="company-nav-item {{ $activeTab === 'overview' ? 'active' : '' }}">
+                        <span>📊</span> Overview
+                    </a>
+                    <a href="{{ route('company.dashboard', ['tab' => 'profile']) }}" class="company-nav-item {{ $activeTab === 'profile' ? 'active' : '' }}">
+                        <span>🏢</span> Company Profile
+                    </a>
+                    <a href="{{ route('company.dashboard', ['tab' => 'jobs']) }}" class="company-nav-item {{ $activeTab === 'jobs' ? 'active' : '' }}">
+                        <span>💼</span> My Jobs
+                    </a>
+                    <a href="{{ route('company.dashboard', ['tab' => 'applications']) }}" class="company-nav-item {{ $activeTab === 'applications' ? 'active' : '' }}">
+                        <span>👥</span> Applicants
+                    </a>
+                    <a href="{{ route('company.dashboard', ['tab' => 'messages']) }}" class="company-nav-item {{ $activeTab === 'messages' ? 'active' : '' }}">
+                        <span>💬</span> Messages
+                    </a>
+                </nav>
             </div>
 
-            <div style="border:1px solid #e5e7eb;border-radius:12px;padding:20px;">
-                <h3 class="primary-text" style="margin-bottom:12px;">Hiring health</h3>
-                <ul style="margin:0;padding-left:18px;color:#4b5563;">
-                    <li>5 interviews scheduled for this week</li>
-                    <li>12 new applicants awaiting review</li>
-                    <li>3 listings expiring soon — consider refreshing</li>
-                </ul>
+            <!-- Right Content Area -->
+            <div style="flex:1; padding:32px; overflow-y:auto;">
+                @if($activeTab === 'overview')
+                    @include('company.dashboard.tabs.overview')
+                @elseif($activeTab === 'profile')
+                    @include('company.dashboard.tabs.profile')
+                @elseif($activeTab === 'jobs')
+                    @include('company.dashboard.tabs.jobs')
+                @elseif($activeTab === 'applications')
+                    @include('company.dashboard.tabs.applications')
+                @elseif($activeTab === 'messages')
+                    @include('company.dashboard.tabs.messages')
+                @endif
             </div>
         </div>
     </div>
 </div>
-@endsection
 
+<style>
+.company-nav-item {
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:12px 24px;
+    color:#475569;
+    text-decoration:none;
+    font-weight:500;
+    transition:all 0.2s;
+    border-left:3px solid transparent;
+}
+.company-nav-item:hover {
+    background:#f1f5f9;
+    color:#235181;
+}
+.company-nav-item.active {
+    background:#eef2ff;
+    color:#235181;
+    border-left-color:#235181;
+    font-weight:600;
+}
+.company-nav-item span {
+    font-size:18px;
+}
+.company-dashboard a {
+    color: #235181;
+    text-decoration: none;
+}
+.company-dashboard a:hover {
+    text-decoration: underline;
+}
+</style>
+@endsection

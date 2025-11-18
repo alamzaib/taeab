@@ -6,7 +6,10 @@
 <div class="container">
     <div class="card" style="max-width: 640px; margin: 30px auto;">
         <h1 class="primary-text" style="font-size: 30px; margin-bottom: 10px;">Edit Profile</h1>
-        <p style="color:#6b7280; margin-bottom: 20px;">Update your contact information and password.</p>
+        <p style="color:#6b7280; margin-bottom: 10px;">Update your contact information and password.</p>
+        <div style="margin-bottom:20px; padding:12px 16px; border:1px dashed #cbd5f5; border-radius:10px; background:#eef2ff;">
+            <strong>Profile ID:</strong> {{ $agent->unique_code }}
+        </div>
 
         @if(session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>

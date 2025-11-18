@@ -14,6 +14,7 @@ class JobDocument extends Model
     protected $fillable = [
         'seeker_id',
         'type',
+        'title',
         'file_name',
         'file_path',
         'mime_type',

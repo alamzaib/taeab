@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $seeker = Auth::guard('seeker')->user();
 
@@ -23,7 +23,13 @@ class DashboardController extends Controller
             ->take(3)
             ->get();
 
-        return view('seeker.dashboard', compact('seeker', 'stats', 'favorites'));
+        $recentApplications = $seeker->applications()
+            ->with('job.company')
+            ->latest()
+            ->take(5)
+            ->get();
+
+        return view('seeker.dashboard', compact('seeker', 'stats', 'favorites', 'recentApplications'));
     }
 }
 

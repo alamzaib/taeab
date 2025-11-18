@@ -79,5 +79,14 @@ class ProfileController extends Controller
 
         return back()->with('success', 'Profile updated successfully.');
     }
+
+    public function refresh(Request $request)
+    {
+        $seeker = $request->user('seeker');
+        $seeker->profile_refreshed_at = now();
+        $seeker->save();
+
+        return back()->with('success', 'Profile visibility refreshed successfully.');
+    }
 }
 

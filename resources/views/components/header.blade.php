@@ -49,12 +49,11 @@
                                 <button type="submit" class="dropdown-item logout-btn">Logout</button>
                             </form>
                         @endauth
-                        @guest
+                        @if(!auth('seeker')->check() && !auth('company')->check() && !auth('agent')->check())
                             <a href="{{ route('seeker.login') }}" class="dropdown-item">Job Seeker Login</a>
                             <a href="{{ route('company.login') }}" class="dropdown-item">Company Login</a>
                             <a href="{{ route('agent.login') }}" class="dropdown-item">Agent Login</a>
-                            <a href="{{ route('admin.login') }}" class="dropdown-item">Admin Login</a>
-                        @endguest
+                        @endif
                     </div>
                 </div>
             </nav>

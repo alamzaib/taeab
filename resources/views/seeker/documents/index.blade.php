@@ -8,6 +8,9 @@
 
 @section('content')
 <div class="container">
+    <div style="margin-bottom:15px;">
+        <a href="{{ route('seeker.dashboard') }}" class="btn btn-secondary">← Back to dashboard</a>
+    </div>
     <div class="card" style="padding:0;">
         <div style="background:linear-gradient(135deg,#235181,#1a3d63);color:white;padding:35px;border-radius:18px 18px 0 0;">
             <p style="margin:0;opacity:.8;">Document hub</p>
@@ -30,6 +33,11 @@
                         @csrf
                         <input type="hidden" name="type" value="resume">
                         <div class="form-group">
+                            <label for="resume-title">Resume Title</label>
+                            <input id="resume-title" type="text" name="title" class="form-control @error('title') is-invalid @enderror" placeholder="e.g., Software Engineer Resume 2024" required>
+                            @error('title')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                        </div>
+                        <div class="form-group">
                             <label for="resume-file">Choose PDF or Word file</label>
                             <input id="resume-file" type="file" name="file" class="form-control @error('file') is-invalid @enderror" required>
                             @error('file')<span class="invalid-feedback">{{ $message }}</span>@enderror
@@ -46,6 +54,11 @@
                     <form action="{{ route('seeker.documents.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         <input type="hidden" name="type" value="cover_letter">
+                        <div class="form-group">
+                            <label for="cover-title">Cover Letter Title</label>
+                            <input id="cover-title" type="text" name="title" class="form-control @error('title') is-invalid @enderror" placeholder="e.g., Cover Letter for Tech Companies" required>
+                            @error('title')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                        </div>
                         <div class="form-group">
                             <label for="cover-file">Choose PDF or Word file</label>
                             <input id="cover-file" type="file" name="file" class="form-control @error('file') is-invalid @enderror" required>
@@ -72,7 +85,7 @@
                         @foreach($documents as $document)
                             <div style="border: 1px solid #e5e7eb; border-radius: 10px; padding: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; background:#f9fafb;">
                                 <div>
-                                    <strong>{{ ucfirst(str_replace('_', ' ', $document->type)) }}</strong>
+                                    <strong>{{ $document->title ?? ucfirst(str_replace('_', ' ', $document->type)) }}</strong>
                                     <p style="margin: 5px 0 0; color: #6b7280;">
                                         {{ $document->file_name }}
                                         @if($document->file_size)
