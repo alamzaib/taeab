@@ -1,6 +1,4 @@
 @php
-    use Illuminate\Support\Facades\Storage;
-
     $heroTitle = $heroTitle ?? $company->company_name;
     $heroDescription = $heroDescription ?? 'Track active mandates, meet promising talent, and keep leadership in the loop from one streamlined workspace.';
     $heroActions = $heroActions ?? [
@@ -11,7 +9,12 @@
     $activeJobsCount = $stats['active_jobs'] ?? $company->jobs()->where('status', 'published')->count();
 @endphp
 
-<div style="position:relative; background:{{ $company->banner_path ? 'url('.Storage::disk('public')->url($company->banner_path).') center/cover' : 'linear-gradient(135deg,#0f4c75,#073046)' }}; padding:32px;">
+@php
+    $bannerUrl = $company->banner_url ?? null;
+    $logoUrl = $company->logo_url ?? null;
+@endphp
+
+<div style="position:relative; background:{{ $bannerUrl ? 'url('.$bannerUrl.') center/cover' : 'linear-gradient(135deg,#0f4c75,#073046)' }}; padding:32px;">
     <div style="position:absolute; inset:0; background:linear-gradient(120deg, rgba(8,47,73,.95), rgba(15,76,117,.7));"></div>
     <div style="position:relative; z-index:2; display:flex; flex-wrap:wrap; gap:24px; align-items:flex-end; color:white;">
         <div style="flex:1 1 320px;">
@@ -25,7 +28,7 @@
                     @endphp
                     <a href="{{ $action['route'] }}"
                         class="{{ $isPrimary ? 'btn-primary' : 'btn btn-light' }}"
-                        style="{{ $isPrimary ? 'background:white;color:#0f4c75;' : 'background:rgba(255,255,255,.15);color:white;border:1px solid rgba(255,255,255,.4);' }}">
+                        style="{{ $isPrimary ? 'background:#235181;color:#fff;' : 'background:rgba(255,255,255,.15);color:white;border:1px solid rgba(255,255,255,.4);' }}">
                         {{ $action['label'] }}
                     </a>
                 @endforeach
@@ -38,8 +41,8 @@
             <p style="margin:0; text-transform:uppercase; letter-spacing:.1em; font-size:11px; color:#bae6fd;">Hiring snapshot</p>
             <div style="display:flex; gap:16px; align-items:center; margin-top:14px;">
                 <div style="width:78px; height:78px; border-radius:16px; overflow:hidden; background:white;">
-                    @if($company->logo_path)
-                        <img src="{{ Storage::disk('public')->url($company->logo_path) }}" alt="Logo" style="width:100%; height:100%; object-fit:contain;">
+                    @if($logoUrl)
+                        <img src="{{ $logoUrl }}" alt="Logo" style="width:100%; height:100%; object-fit:contain;">
                     @else
                         <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#0f4c75;">Logo</div>
                     @endif

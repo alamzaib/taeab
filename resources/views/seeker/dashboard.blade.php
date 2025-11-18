@@ -70,7 +70,10 @@
                         <span>💬</span> Messages
                     </a>
                     <a href="{{ route('seeker.dashboard', ['tab' => 'resume']) }}" class="seeker-nav-item {{ $activeTab === 'resume' ? 'active' : '' }}">
-                        <span>📄</span> My Resume
+                        <span>📄</span> Documents
+                    </a>
+                    <a href="{{ route('seeker.dashboard', ['tab' => 'resume-builder']) }}" class="seeker-nav-item {{ $activeTab === 'resume-builder' ? 'active' : '' }}">
+                        <span>🧱</span> Build Resume
                     </a>
                     <a href="{{ route('seeker.dashboard', ['tab' => 'favorites']) }}" class="seeker-nav-item {{ $activeTab === 'favorites' ? 'active' : '' }}">
                         <span>⭐</span> Favourite Jobs
@@ -90,6 +93,8 @@
                     @include('seeker.dashboard.tabs.messages')
                 @elseif($activeTab === 'resume')
                     @include('seeker.dashboard.tabs.resume')
+                @elseif($activeTab === 'resume-builder')
+                    @include('seeker.dashboard.tabs.resume-builder')
                 @elseif($activeTab === 'favorites')
                     @include('seeker.dashboard.tabs.favorites')
                 @endif

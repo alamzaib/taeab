@@ -3,9 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Seeker extends Authenticatable
 {
@@ -19,6 +19,8 @@ class Seeker extends Authenticatable
         'profile_photo_path',
         'profile_cover_path',
         'about',
+        'resume_bio',
+        'resume_portfolio_url',
         'skills',
         'current_salary',
         'target_salary',
@@ -86,6 +88,26 @@ class Seeker extends Authenticatable
     public function favorites(): HasMany
     {
         return $this->hasMany(JobFavorite::class);
+    }
+
+    public function educations(): HasMany
+    {
+        return $this->hasMany(SeekerEducation::class);
+    }
+
+    public function experiences(): HasMany
+    {
+        return $this->hasMany(SeekerExperience::class);
+    }
+
+    public function references(): HasMany
+    {
+        return $this->hasMany(SeekerReference::class);
+    }
+
+    public function hobbies(): HasMany
+    {
+        return $this->hasMany(SeekerHobby::class);
     }
 
     public function getProfilePhotoUrlAttribute(): string

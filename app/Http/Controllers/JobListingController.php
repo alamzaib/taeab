@@ -3,17 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Models\Job;
-use App\Models\JobFavorite;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Carbon;
 
 class JobListingController extends Controller
 {
     public function index(Request $request)
     {
         $query = Job::with('company')
-            ->where('status', 'published')
-            ->latest();
+            ->where('status', 'published');
 
         if ($request->filled('q')) {
             $search = $request->q;
@@ -28,8 +27,62 @@ class JobListingController extends Controller
             $query->where('location', 'like', '%' . $request->location . '%');
         }
 
-        if ($request->filled('job_type')) {
-            $query->where('job_type', $request->job_type);
+        $jobTypeFilters = array_filter((array) $request->input('job_types', []));
+        if (!empty($jobTypeFilters)) {
+            $query->whereIn('job_type', $jobTypeFilters);
+        }
+
+        $experienceFilters = array_filter((array) $request->input('experience_levels', []));
+        if (!empty($experienceFilters)) {
+            $query->whereIn('experience_level', $experienceFilters);
+        }
+
+        if ($request->filled('company_name')) {
+            $companySearch = $request->company_name;
+            $query->whereHas('company', function ($q) use ($companySearch) {
+                $q->where('company_name', 'like', '%' . $companySearch . '%');
+            });
+        }
+
+        if ($request->filled('salary_min')) {
+            $salaryMin = (int) preg_replace('/[^\d]/', '', $request->salary_min);
+            $query->where(function ($q) use ($salaryMin) {
+                $q->where(function ($sub) use ($salaryMin) {
+                    $sub->whereNotNull('salary_min')->where('salary_min', '>=', $salaryMin);
+                })->orWhere(function ($sub) use ($salaryMin) {
+                    $sub->whereNotNull('salary_max')->where('salary_max', '>=', $salaryMin);
+                });
+            });
+        }
+
+        if ($request->filled('salary_max')) {
+            $salaryMax = (int) preg_replace('/[^\d]/', '', $request->salary_max);
+            $query->where(function ($q) use ($salaryMax) {
+                $q->where(function ($sub) use ($salaryMax) {
+                    $sub->whereNotNull('salary_max')->where('salary_max', '<=', $salaryMax);
+                })->orWhere(function ($sub) use ($salaryMax) {
+                    $sub->whereNotNull('salary_min')->where('salary_min', '<=', $salaryMax);
+                });
+            });
+        }
+
+        if ($request->filled('posted_within') && $request->posted_within !== 'any') {
+            $thresholds = [
+                '24h' => Carbon::now()->subDay(),
+                '3d' => Carbon::now()->subDays(3),
+                '7d' => Carbon::now()->subDays(7),
+                '30d' => Carbon::now()->subDays(30),
+            ];
+
+            if (isset($thresholds[$request->posted_within])) {
+                $date = $thresholds[$request->posted_within];
+                $query->where(function ($q) use ($date) {
+                    $q->where('posted_at', '>=', $date)
+                        ->orWhere(function ($sub) use ($date) {
+                            $sub->whereNull('posted_at')->where('created_at', '>=', $date);
+                        });
+                });
+            }
         }
 
         if ($request->filled('sort')) {
@@ -51,16 +104,28 @@ class JobListingController extends Controller
             $query->orderBy('posted_at', 'desc');
         }
 
-        $jobs = $query->paginate(10)->withQueryString();
+        $jobs = $query->paginate(12)->withQueryString();
 
         $jobTypes = Job::whereNotNull('job_type')
             ->distinct()
             ->orderBy('job_type')
             ->pluck('job_type');
 
+        $experienceLevels = Job::whereNotNull('experience_level')
+            ->distinct()
+            ->orderBy('experience_level')
+            ->pluck('experience_level');
+
+        $salaryRange = [
+            'min' => Job::whereNotNull('salary_min')->min('salary_min') ?? 0,
+            'max' => Job::whereNotNull('salary_max')->max('salary_max') ?? 0,
+        ];
+
         return view('jobs.index', [
             'jobs' => $jobs,
             'jobTypes' => $jobTypes,
+            'experienceLevels' => $experienceLevels,
+            'salaryRange' => $salaryRange,
         ]);
     }
 

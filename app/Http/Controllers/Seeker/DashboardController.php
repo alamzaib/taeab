@@ -11,6 +11,12 @@ class DashboardController extends Controller
     public function index(Request $request)
     {
         $seeker = Auth::guard('seeker')->user();
+        $seeker->load([
+            'educations' => fn ($query) => $query->orderByDesc('end_date')->orderByDesc('start_date'),
+            'experiences' => fn ($query) => $query->orderByDesc('is_current')->orderByDesc('end_date')->orderByDesc('start_date'),
+            'references',
+            'hobbies',
+        ]);
 
         $stats = [
             'applications' => $seeker->applications()->count(),

@@ -34,7 +34,7 @@ class ApplicationController extends Controller
         return view('company.applications.index', compact('applications', 'jobs', 'company'));
     }
 
-    public function show(JobApplication $application)
+    public function show(Request $request, JobApplication $application)
     {
         $company = Auth::guard('company')->user();
         abort_if($application->job->company_id !== $company->id, 403);
@@ -48,6 +48,19 @@ class ApplicationController extends Controller
             ->whereNull('read_at')
             ->where('sender_type', 'seeker')
             ->update(['read_at' => now()]);
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'messages' => $messages->map(function ($message) {
+                    return [
+                        'id' => $message->id,
+                        'sender_type' => $message->sender_type,
+                        'message' => $message->message,
+                        'created_at' => $message->created_at->toIso8601String(),
+                    ];
+                }),
+            ]);
+        }
 
         return view('company.applications.show', compact('application', 'messages', 'company'));
     }
@@ -68,6 +81,13 @@ class ApplicationController extends Controller
             'seeker_id' => $application->seeker_id,
             'message' => $validated['message'],
         ]);
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Message sent successfully.',
+            ]);
+        }
 
         return back()->with('success', 'Message sent to seeker.');
     }

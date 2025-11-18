@@ -10,14 +10,17 @@ class CompanyListingController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Company::query()->orderBy('company_name');
+        $query = Company::query()
+            ->withCount(['jobs as active_jobs_count' => function ($q) {
+                $q->where('status', 'published');
+            }]);
 
-        if ($request->has('status')) {
-            if ($request->status !== null && $request->status !== '') {
-                $query->where('status', $request->status);
-            }
-        } else {
-            $query->where('status', 'active');
+        $statusFilter = $request->has('status')
+            ? $request->status
+            : 'active';
+
+        if ($statusFilter !== null && $statusFilter !== '') {
+            $query->where('status', $statusFilter);
         }
 
         if ($request->filled('q')) {
@@ -36,6 +39,40 @@ class CompanyListingController extends Controller
             $query->where('company_size', $request->company_size);
         }
 
+        if ($request->filled('city')) {
+            $query->where('city', 'like', '%' . $request->city . '%');
+        }
+
+        if ($request->filled('country')) {
+            $query->where('country', 'like', '%' . $request->country . '%');
+        }
+
+        if ($request->filled('organization_type')) {
+            $query->where('organization_type', $request->organization_type);
+        }
+
+        if ($request->boolean('has_openings')) {
+            $query->whereHas('jobs', function ($q) {
+                $q->where('status', 'published');
+            });
+        }
+
+        switch ($request->get('sort', 'name_asc')) {
+            case 'name_desc':
+                $query->orderBy('company_name', 'desc');
+                break;
+            case 'recent':
+                $query->orderByDesc('created_at');
+                break;
+            case 'jobs_desc':
+                $query->orderByDesc('active_jobs_count');
+                break;
+            case 'name_asc':
+            default:
+                $query->orderBy('company_name');
+                break;
+        }
+
         $companies = $query->paginate(12)->withQueryString();
 
         $industries = Company::whereNotNull('industry')
@@ -48,10 +85,29 @@ class CompanyListingController extends Controller
             ->orderBy('company_size')
             ->pluck('company_size');
 
+        $organizationTypes = Company::whereNotNull('organization_type')
+            ->distinct()
+            ->orderBy('organization_type')
+            ->pluck('organization_type');
+
+        $countries = Company::whereNotNull('country')
+            ->distinct()
+            ->orderBy('country')
+            ->pluck('country');
+
+        $cities = Company::whereNotNull('city')
+            ->distinct()
+            ->orderBy('city')
+            ->pluck('city');
+
         return view('companies.index', [
             'companies' => $companies,
             'industries' => $industries,
             'companySizes' => $companySizes,
+            'organizationTypes' => $organizationTypes,
+            'countries' => $countries,
+            'cities' => $cities,
+            'statusFilter' => $statusFilter,
         ]);
     }
 

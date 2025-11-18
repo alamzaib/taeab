@@ -22,7 +22,9 @@ use App\Http\Controllers\JobListingController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\Seeker\DocumentController;
 use App\Http\Controllers\Agent\ProfileController as AgentProfileController;
+use App\Http\Controllers\Seeker\ResumeController as SeekerResumeController;
 use App\Http\Controllers\CompanyListingController;
+use App\Http\Controllers\PublicSeekerController;
 
 // Home page
 Route::get('/', function () {
@@ -36,11 +38,13 @@ Route::get('/companies/{company}', [CompanyListingController::class, 'show'])->n
 // Static Pages
 Route::redirect('/pages', '/pages/about');
 Route::get('/pages/{slug}', [PageController::class, 'show'])->name('pages.show');
+Route::get('/talent/{code}', [PublicSeekerController::class, 'show'])->name('seekers.public.show');
 
 Route::get('/jobs/{slug}', [JobListingController::class, 'show'])->name('jobs.show');
 Route::get('/jobs/{slug}/apply', [JobApplicationController::class, 'create'])->middleware('auth:seeker')->name('jobs.apply.form');
 Route::post('/jobs/{slug}/apply', [JobApplicationController::class, 'store'])->middleware('auth:seeker')->name('jobs.apply');
 Route::post('/jobs/{slug}/favorite', [JobListingController::class, 'toggleFavorite'])->middleware('auth:seeker')->name('jobs.favorite');
+Route::get('/login', fn () => redirect()->route('seeker.login'))->name('login');
 
 Route::fallback(function () {
     return response()->view('errors.404', [], 404);
@@ -85,6 +89,18 @@ Route::prefix('seeker')->group(function () {
         Route::get('/profile/edit', [SeekerProfileController::class, 'edit'])->name('seeker.profile.edit');
         Route::post('/profile', [SeekerProfileController::class, 'update'])->name('seeker.profile.update');
         Route::post('/profile/refresh', [SeekerProfileController::class, 'refresh'])->name('seeker.profile.refresh');
+        Route::prefix('resume')->name('seeker.resume.')->group(function () {
+            Route::post('/profile', [SeekerResumeController::class, 'updateProfile'])->name('profile');
+            Route::get('/preview', [SeekerResumeController::class, 'preview'])->name('preview');
+            Route::post('/educations', [SeekerResumeController::class, 'storeEducation'])->name('educations.store');
+            Route::delete('/educations/{education}', [SeekerResumeController::class, 'destroyEducation'])->name('educations.destroy');
+            Route::post('/experiences', [SeekerResumeController::class, 'storeExperience'])->name('experiences.store');
+            Route::delete('/experiences/{experience}', [SeekerResumeController::class, 'destroyExperience'])->name('experiences.destroy');
+            Route::post('/references', [SeekerResumeController::class, 'storeReference'])->name('references.store');
+            Route::delete('/references/{reference}', [SeekerResumeController::class, 'destroyReference'])->name('references.destroy');
+            Route::post('/hobbies', [SeekerResumeController::class, 'storeHobby'])->name('hobbies.store');
+            Route::delete('/hobbies/{hobby}', [SeekerResumeController::class, 'destroyHobby'])->name('hobbies.destroy');
+        });
         Route::get('/applications', [SeekerApplicationController::class, 'index'])->name('seeker.applications.index');
         Route::get('/applications/{application}', [SeekerApplicationController::class, 'show'])->name('seeker.applications.show');
         Route::post('/applications/{application}/messages', [SeekerApplicationController::class, 'storeMessage'])->name('seeker.applications.messages.store');

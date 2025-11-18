@@ -51,6 +51,29 @@ class Company extends Authenticatable
         return $this->hasMany(Job::class);
     }
 
+    public function getLogoUrlAttribute(): ?string
+    {
+        $path = $this->normalizeStoragePath($this->logo_path);
+
+        return $path ? asset('storage/' . ltrim($path, '/')) : null;
+    }
+
+    public function getBannerUrlAttribute(): ?string
+    {
+        $path = $this->normalizeStoragePath($this->banner_path);
+
+        return $path ? asset('storage/' . ltrim($path, '/')) : null;
+    }
+
+    protected function normalizeStoragePath(?string $path): ?string
+    {
+        if (!$path) {
+            return null;
+        }
+
+        return str_replace('\\', '/', $path);
+    }
+
     protected static function booted(): void
     {
         static::creating(function (self $company) {
