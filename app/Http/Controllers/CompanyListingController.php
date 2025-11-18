@@ -113,13 +113,38 @@ class CompanyListingController extends Controller
 
     public function show(Company $company)
     {
-        $activeJobs = Job::where('company_id', $company->id)->where('status', 'published')->latest()->take(5)->get();
+        $activeJobs = Job::where('company_id', $company->id)
+            ->where('status', 'published')
+            ->latest()
+            ->take(5)
+            ->get();
+
+        $recentApplications = Job::where('company_id', $company->id)
+            ->with(['applications' => function ($query) {
+                $query->latest()
+                    ->whereNotNull('cover_letter')
+                    ->take(3)
+                    ->with('seeker');
+            }])
+            ->get();
+
+        $reviews = $recentApplications->flatMap(function ($job) {
+            return $job->applications->map(function ($application) use ($job) {
+                return [
+                    'seeker' => $application->seeker?->name ?? 'Job seeker',
+                    'submitted_at' => $application->created_at,
+                    'job_title' => $job->title,
+                    'content' => $application->cover_letter ?? '',
+                ];
+            });
+        })->take(3);
+
         $stats = [
             'total_jobs' => Job::where('company_id', $company->id)->count(),
             'active_jobs' => Job::where('company_id', $company->id)->where('status', 'published')->count(),
         ];
 
-        return view('companies.show', compact('company', 'activeJobs', 'stats'));
+        return view('companies.show', compact('company', 'activeJobs', 'stats', 'reviews'));
     }
 }
 

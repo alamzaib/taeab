@@ -10,124 +10,255 @@
 @section('meta_description', Str::limit(strip_tags($job->short_description ?? $job->description ?? ''), 150))
 
 @section('content')
-<div class="container">
-    <div class="card">
-        @if(session('success'))
-            <div class="alert alert-success">{{ session('success') }}</div>
-        @endif
+<div class="job-detail-shell container">
+    @if(session('success'))
+        <div class="alert alert-success">{{ session('success') }}</div>
+    @endif
 
-        <div style="margin-bottom: 20px; display:flex; justify-content:space-between; align-items:center; gap:10px;">
-            <a href="{{ route('jobs.index') }}" style="text-decoration: none; color: #6b7280;">← Back to all jobs</a>
-            @if($isSeeker)
-                <form action="{{ route('jobs.favorite', $job->slug) }}" method="POST" style="margin:0;">
-                    @csrf
-                    <button type="submit" class="btn btn-secondary" style="display:flex; align-items:center; gap:6px;">
-                        {{ $isFavorited ? '★ Favorited' : '☆ Save Job' }}
-                    </button>
-                </form>
-            @else
-                <button id="favorite-btn" class="btn btn-secondary" style="display:flex; align-items:center; gap:6px;">☆ Save Job</button>
-            @endif
-        </div>
-
-        <h1 class="primary-text" style="font-size: 34px; margin-bottom: 10px;">{{ $job->title }}</h1>
-        <div style="color: #6b7280; margin-bottom: 20px;">
-            {{ $job->company->company_name ?? 'Company' }} • {{ $job->location ?? 'UAE' }}
-        </div>
-
-        <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 25px;">
-            @if($job->job_type)
-                <div style="flex: 1; min-width: 180px;">
-                    <div style="font-size: 12px; color: #9ca3af; text-transform: uppercase;">Job Type</div>
-                    <div style="font-weight: 600;">{{ $job->job_type }}</div>
-                </div>
-            @endif
-            @if($job->experience_level)
-                <div style="flex: 1; min-width: 180px;">
-                    <div style="font-size: 12px; color: #9ca3af; text-transform: uppercase;">Experience</div>
-                    <div style="font-weight: 600;">{{ $job->experience_level }}</div>
-                </div>
-            @endif
-            <div style="flex: 1; min-width: 180px;">
-                <div style="font-size: 12px; color: #9ca3af; text-transform: uppercase;">Salary Range</div>
-                <div style="font-weight: 600;">
-                    @if($job->salary_min || $job->salary_max)
-                        @if($job->salary_min)
-                            AED {{ number_format($job->salary_min) }}
-                        @endif
-                        @if($job->salary_min && $job->salary_max) - @endif
-                        @if($job->salary_max)
-                            AED {{ number_format($job->salary_max) }}
-                        @endif
-                    @else
-                        Not specified
-                    @endif
-                </div>
-            </div>
-            <div style="flex: 1; min-width: 180px;">
-                <div style="font-size: 12px; color: #9ca3af; text-transform: uppercase;">Posted</div>
-                <div style="font-weight: 600;">{{ optional($job->posted_at)->format('M d, Y') ?? $job->created_at->format('M d, Y') }}</div>
-            </div>
-        </div>
-
-        @if($job->short_description)
-            <div class="page-content" style="margin-bottom: 25px;">
-                {!! nl2br(e($job->short_description)) !!}
-            </div>
-        @endif
-
-        @if($job->description)
-            <h2 class="primary-text" style="font-size: 24px; margin-bottom: 10px;">Job Description</h2>
-            <div class="page-content" style="margin-bottom: 25px;">
-                {!! $job->description !!}
-            </div>
-        @endif
-
-        @if($job->requirements)
-            <h2 class="primary-text" style="font-size: 24px; margin-bottom: 10px;">Requirements</h2>
-            <div class="page-content" style="margin-bottom: 25px;">
-                {!! $job->requirements !!}
-            </div>
-        @endif
-
-        @if(!($isSeeker && $hasApplied))
-            <div style="margin-top: 40px; border-top: 1px solid #e5e7eb; padding-top: 25px;">
-                <h2 class="primary-text" style="font-size: 24px; margin-bottom: 15px;">Apply for this job</h2>
-
+    <div class="job-hero card">
+        <div class="job-hero-top">
+            <a href="{{ route('jobs.index') }}" class="back-link">← Back to all jobs</a>
+            <div class="job-hero-actions">
                 @if($isSeeker)
-                    <div class="card" style="margin-bottom: 20px; background-color: #f8fafc;">
-                        <h3 class="primary-text" style="margin-bottom: 10px;">Your default documents</h3>
-                        <ul style="list-style: none; padding-left: 0; margin-bottom: 0;">
-                            <li style="margin-bottom: 8px;">
-                                <strong>Resume:</strong>
-                                @if($defaultResume)
-                                    <a href="{{ Storage::disk('public')->url($defaultResume->file_path) }}" target="_blank">
-                                        {{ $defaultResume->file_name }}
-                                    </a>
-                                @else
-                                    <span style="color: #dc2626;">Not set. <a class="primary-text" href="{{ route('seeker.documents.index') }}">Upload a resume</a>.</span>
-                                @endif
-                            </li>
-                            <li>
-                                <strong>Cover Letter:</strong>
-                                @if($defaultCover)
-                                    <a href="{{ Storage::disk('public')->url($defaultCover->file_path) }}" target="_blank">
-                                        {{ $defaultCover->file_name }}
-                                    </a>
-                                @else
-                                    <span style="color: #6b7280;">Optional. <a class="primary-text" href="{{ route('seeker.documents.index') }}">Upload a cover letter</a>.</span>
-                                @endif
-                            </li>
-                        </ul>
-                    </div>
-                    <a href="{{ route('jobs.apply.form', $job->slug) }}" class="btn-primary">Proceed to Application</a>
+                    <form action="{{ route('jobs.favorite', $job->slug) }}" method="POST">
+                        @csrf
+                        <button type="submit" class="btn btn-light btn-sm">
+                            {{ $isFavorited ? '★ Favorited' : '☆ Save job' }}
+                        </button>
+                    </form>
                 @else
-                    <button id="apply-btn" class="btn-primary">Apply Now</button>
+                    <button id="favorite-btn" class="btn btn-light btn-sm">☆ Save job</button>
+                @endif
+                <button class="btn btn-light btn-sm" onclick="navigator.share ? navigator.share({title: '{{ $job->title }}', url: '{{ request()->fullUrl() }}'}) : window.alert('Copy link: {{ request()->fullUrl() }}')">Share</button>
+            </div>
+        </div>
+        <div class="job-hero-main">
+            <div>
+                <p class="eyebrow">Opportunity</p>
+                <h1>{{ $job->title }}</h1>
+                <p class="job-meta">{{ $job->company->company_name ?? 'Company confidential' }} • {{ $job->location ?? 'UAE' }}</p>
+                <div class="job-meta-grid">
+                    @if($job->job_type)
+                        <div>
+                            <span>Job type</span>
+                            <strong>{{ $job->job_type }}</strong>
+                        </div>
+                    @endif
+                    @if($job->experience_level)
+                        <div>
+                            <span>Experience</span>
+                            <strong>{{ $job->experience_level }}</strong>
+                        </div>
+                    @endif
+                    <div>
+                        <span>Salary range</span>
+                        <strong>
+                            @if($job->salary_min || $job->salary_max)
+                                @if($job->salary_min) AED {{ number_format($job->salary_min) }} @endif
+                                @if($job->salary_min && $job->salary_max) – @endif
+                                @if($job->salary_max) AED {{ number_format($job->salary_max) }} @endif
+                            @else
+                                Not specified
+                            @endif
+                        </strong>
+                    </div>
+                    <div>
+                        <span>Posted on</span>
+                        <strong>{{ optional($job->posted_at)->format('M d, Y') ?? $job->created_at->format('M d, Y') }}</strong>
+                    </div>
+                </div>
+            </div>
+            <div class="job-hero-cta">
+                @if($isSeeker)
+                    @if($hasApplied)
+                        <span class="badge badge-success">Application submitted</span>
+                    @else
+                        <a href="{{ route('jobs.apply.form', $job->slug) }}" class="btn-primary btn-lg">Apply now</a>
+                        <small>You'll review documents before submitting.</small>
+                    @endif
+                @else
+                    <button id="apply-btn" class="btn-primary btn-lg">Apply now</button>
+                    <small>Login as a job seeker to start application.</small>
                 @endif
             </div>
-        @endif
+        </div>
+    </div>
+
+    <div class="job-body-grid">
+        <div class="job-content card">
+            @if($job->short_description)
+                <div class="job-section">
+                    <h2>Role snapshot</h2>
+                    <div class="page-content">
+                        {!! nl2br(e($job->short_description)) !!}
+                    </div>
+                </div>
+            @endif
+            @if($job->description)
+                <div class="job-section">
+                    <h2>Job description</h2>
+                    <div class="page-content">
+                        {!! $job->description !!}
+                    </div>
+                </div>
+            @endif
+            @if($job->requirements)
+                <div class="job-section">
+                    <h2>Requirements</h2>
+                    <div class="page-content">
+                        {!! $job->requirements !!}
+                    </div>
+                </div>
+            @endif
+        </div>
+
+        <aside class="job-sidebar">
+            <div class="card job-company-card">
+                <h3>About the company</h3>
+                <p class="company-name">{{ $job->company->company_name ?? 'Company confidential' }}</p>
+                <p class="company-meta">
+                    {{ $job->company->industry ?? 'Industry not specified' }}<br>
+                    {{ $job->company->city ?? '—' }}
+                    @if($job->company->city && $job->company->country) • @endif
+                    {{ $job->company->country ?? '' }}
+                </p>
+                <a href="{{ route('companies.show', $job->company) }}" class="btn btn-light btn-sm">View company profile</a>
+            </div>
+            @if($isSeeker && !$hasApplied)
+                <div class="card job-documents">
+                    <h3>Your default documents</h3>
+                    <ul>
+                        <li>
+                            <span>Resume</span>
+                            @if($defaultResume)
+                                <a href="{{ Storage::disk('public')->url($defaultResume->file_path) }}" target="_blank">{{ $defaultResume->file_name }}</a>
+                            @else
+                                <em>Not set</em>
+                            @endif
+                        </li>
+                        <li>
+                            <span>Cover letter</span>
+                            @if($defaultCover)
+                                <a href="{{ Storage::disk('public')->url($defaultCover->file_path) }}" target="_blank">{{ $defaultCover->file_name }}</a>
+                            @else
+                                <em>Optional</em>
+                            @endif
+                        </li>
+                    </ul>
+                    <p class="muted-text">These files are pre-selected when you apply.</p>
+                </div>
+            @endif
+        </aside>
     </div>
 </div>
+
+<style>
+    .job-detail-shell {
+        margin-bottom: 40px;
+    }
+    .job-hero {
+        padding: 28px;
+        margin-bottom: 24px;
+    }
+    .job-hero-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+    .back-link {
+        color: #6b7280;
+        text-decoration: none;
+    }
+    .job-hero-actions {
+        display: flex;
+        gap: 10px;
+    }
+    .job-hero-main {
+        display: flex;
+        justify-content: space-between;
+        gap: 24px;
+        flex-wrap: wrap;
+    }
+    .job-hero-main h1 {
+        margin: 4px 0 8px;
+        font-size: 32px;
+    }
+    .job-meta {
+        margin: 0 0 18px;
+        color: #64748b;
+        font-size: 15px;
+    }
+    .job-meta-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 14px;
+    }
+    .job-meta-grid span {
+        display: block;
+        font-size: 12px;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        color: #94a3b8;
+        margin-bottom: 4px;
+    }
+    .job-hero-cta {
+        min-width: 240px;
+        text-align: right;
+    }
+    .job-body-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr);
+        gap: 24px;
+    }
+    .job-content, .job-company-card, .job-documents {
+        border-radius: 18px;
+        padding: 24px;
+    }
+    .job-section + .job-section {
+        margin-top: 32px;
+    }
+    .job-sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+    }
+    .job-company-card h3, .job-documents h3 {
+        margin-top: 0;
+    }
+    .job-company-card p {
+        margin: 4px 0;
+    }
+    .job-documents ul {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 10px 0;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    .job-documents li {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        color: #475569;
+    }
+    .job-documents span {
+        font-weight: 600;
+    }
+    @media screen and (max-width: 1024px) {
+        .job-body-grid {
+            grid-template-columns: 1fr;
+        }
+        .job-hero-main {
+            flex-direction: column;
+        }
+        .job-hero-cta {
+            text-align: left;
+        }
+    }
+</style>
 @endsection
 
 @push('scripts')

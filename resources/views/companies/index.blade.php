@@ -1,100 +1,188 @@
 @extends('layouts.app')
 
+@php
+    use Illuminate\Support\Str;
+@endphp
+
 @section('title', 'Companies - Job Portal UAE')
 
 @section('content')
-<div class="container">
-    <div class="card">
-        <h1 class="primary-text" style="font-size: 32px; margin-bottom: 25px;">Browse Companies</h1>
+@php
+    $selectedStatus = $statusFilter ?? 'active';
+    $sort = request('sort', 'name_asc');
+@endphp
 
-        <div style="display: grid; grid-template-columns: 280px 1fr; gap: 25px;">
-            <aside style="border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px; align-self: start;">
-                <form action="{{ route('companies.index') }}" method="GET">
-                    <div class="form-group">
-                        <label for="q">Search</label>
-                        <input type="text" name="q" id="q" class="form-control" placeholder="Company or industry" value="{{ request('q') }}">
+<div class="companies-shell container">
+    <div class="card companies-wrapper">
+        <div class="companies-grid">
+            <aside class="companies-filter-panel">
+                <div class="filter-panel-header">
+                    <div>
+                        <p class="eyebrow">Filter organisations</p>
+                        <h2>Filters</h2>
                     </div>
-                    <div class="form-group">
-                        <label for="industry">Industry</label>
-                        <select name="industry" id="industry" class="form-control">
-                            <option value="">All Industries</option>
-                            @foreach($industries as $industry)
-                                <option value="{{ $industry }}" {{ request('industry') === $industry ? 'selected' : '' }}>
-                                    {{ $industry }}
-                                </option>
-                            @endforeach
-                        </select>
+                    <a href="{{ route('companies.index') }}" class="filter-reset">Clear all</a>
+                </div>
+                <form action="{{ route('companies.index') }}" method="GET" class="filter-form">
+                    <input type="hidden" name="sort" value="{{ $sort }}">
+                    <div class="filter-group">
+                        <label class="filter-label" for="q">Search</label>
+                        <input type="text" id="q" name="q" class="form-control"
+                               placeholder="Company or keyword" value="{{ request('q') }}">
                     </div>
-                    <div class="form-group">
-                        <label for="company_size">Company Size</label>
-                        <select name="company_size" id="company_size" class="form-control">
-                            <option value="">All Sizes</option>
-                            @foreach($companySizes as $size)
-                                <option value="{{ $size }}" {{ request('company_size') === $size ? 'selected' : '' }}>
-                                    {{ $size }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    @php
-                        $statusFilter = request()->has('status') ? request('status') : 'active';
-                    @endphp
-                    <div class="form-group">
-                        <label for="status">Status</label>
+                    <div class="filter-group">
+                        <label class="filter-label" for="status">Status</label>
                         <select name="status" id="status" class="form-control">
-                            <option value="active" {{ $statusFilter === 'active' ? 'selected' : '' }}>Active</option>
-                            <option value="inactive" {{ $statusFilter === 'inactive' ? 'selected' : '' }}>Inactive</option>
-                            <option value="" {{ $statusFilter === '' ? 'selected' : '' }}>Any</option>
+                            <option value="active" {{ $selectedStatus === 'active' ? 'selected' : '' }}>Active</option>
+                            <option value="inactive" {{ $selectedStatus === 'inactive' ? 'selected' : '' }}>Inactive</option>
+                            <option value="" {{ $selectedStatus === '' ? 'selected' : '' }}>Any</option>
                         </select>
                     </div>
-                    <button type="submit" class="btn-primary" style="width: 100%;">Apply Filters</button>
+                    <div class="filter-group">
+                        <label class="filter-label" for="industry">Industry</label>
+                        <select name="industry" id="industry" class="form-control">
+                            <option value="">All industries</option>
+                            @foreach($industries as $industry)
+                                <option value="{{ $industry }}" {{ request('industry') === $industry ? 'selected' : '' }}>{{ $industry }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label" for="company_size">Company size</label>
+                        <select name="company_size" id="company_size" class="form-control">
+                            <option value="">All sizes</option>
+                            @foreach($companySizes as $size)
+                                <option value="{{ $size }}" {{ request('company_size') === $size ? 'selected' : '' }}>{{ $size }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label" for="organization_type">Organisation type</label>
+                        <select name="organization_type" id="organization_type" class="form-control">
+                            <option value="">Any type</option>
+                            @foreach($organizationTypes as $type)
+                                <option value="{{ $type }}" {{ request('organization_type') === $type ? 'selected' : '' }}>{{ $type }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label" for="country">Country</label>
+                        <select name="country" id="country" class="form-control">
+                            <option value="">Any country</option>
+                            @foreach($countries as $country)
+                                <option value="{{ $country }}" {{ request('country') === $country ? 'selected' : '' }}>{{ $country }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label" for="city">City</label>
+                        <select name="city" id="city" class="form-control">
+                            <option value="">Any city</option>
+                            @foreach($cities as $city)
+                                <option value="{{ $city }}" {{ request('city') === $city ? 'selected' : '' }}>{{ $city }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Open roles</label>
+                        <label class="toggle">
+                            <input type="checkbox" name="has_openings" value="1" {{ request()->boolean('has_openings') ? 'checked' : '' }}>
+                            <span>Show companies hiring now</span>
+                        </label>
+                    </div>
+                    <div class="filter-actions">
+                        <a href="{{ route('companies.index') }}" class="btn btn-light">Reset</a>
+                        <button type="submit" class="btn-primary">Apply filters</button>
+                    </div>
                 </form>
             </aside>
 
-            <section>
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <section class="companies-results">
+                <div class="companies-results-header">
                     <div>
-                        <strong>{{ $companies->total() }}</strong> companies found
+                        <p class="eyebrow">{{ $companies->total() }} companies</p>
+                        <h1>Browse Companies</h1>
                     </div>
+                    <form method="GET" action="{{ route('companies.index') }}" class="sort-form">
+                        @foreach(request()->except('sort') as $param => $value)
+                            @if(is_array($value))
+                                @foreach($value as $item)
+                                    <input type="hidden" name="{{ $param }}[]" value="{{ $item }}">
+                                @endforeach
+                            @else
+                                <input type="hidden" name="{{ $param }}" value="{{ $value }}">
+                            @endif
+                        @endforeach
+                        <label for="sort" class="filter-label" style="margin:0;">Sort by</label>
+                        <select name="sort" id="sort" class="form-control" onchange="this.form.submit()">
+                            <option value="name_asc" {{ $sort === 'name_asc' ? 'selected' : '' }}>Name A-Z</option>
+                            <option value="name_desc" {{ $sort === 'name_desc' ? 'selected' : '' }}>Name Z-A</option>
+                            <option value="recent" {{ $sort === 'recent' ? 'selected' : '' }}>Recently added</option>
+                            <option value="jobs_desc" {{ $sort === 'jobs_desc' ? 'selected' : '' }}>Most open roles</option>
+                        </select>
+                    </form>
                 </div>
 
                 @if($companies->isEmpty())
-                    <p style="text-align: center; color: #6b7280;">No companies match your filters.</p>
+                    <div class="empty-state">
+                        <h3>No companies match your filters</h3>
+                        <p>Adjust the filters or reset them to discover more employers.</p>
+                        <a href="{{ route('companies.index') }}" class="btn-primary btn-sm">Reset filters</a>
+                    </div>
                 @else
-                    <div style="display: grid; gap: 20px;">
+                    <div class="companies-result-grid">
                         @foreach($companies as $company)
-                            <div class="card" style="margin-bottom: 0;">
-                                <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
-                                    <div>
-                                        <h2 class="primary-text" style="margin-bottom: 5px;">
-                                            <a href="{{ route('companies.show', $company) }}" style="text-decoration:none; color:inherit;">
-                                                {{ $company->company_name ?? $company->name }}
-                                            </a>
-                                        </h2>
-                                        <p style="margin: 0; color: #6b7280;">
-                                            {{ $company->industry ?? 'Industry not specified' }}
-                                            @if($company->company_size)
-                                                • {{ $company->company_size }}
-                                            @endif
-                                        </p>
-                                        <p style="margin: 5px 0 0; color: #6b7280;">Contact: {{ $company->email }}</p>
+                            <article class="company-card">
+                                <div class="company-card-header">
+                                    <div class="company-avatar">
+                                        @if($company->logo_url)
+                                            <img src="{{ $company->logo_url }}" alt="{{ $company->company_name ?? $company->name }}">
+                                        @else
+                                            <span>{{ strtoupper(substr($company->company_name ?? $company->name, 0, 1)) }}</span>
+                                        @endif
                                     </div>
-                                    <div style="text-align: right;">
-                                        <span class="badge {{ $company->status === 'active' ? 'badge-success' : 'badge-secondary' }}">
+                                    <div class="company-card-meta">
+                                        <a href="{{ route('companies.show', $company) }}" class="company-card-title">
+                                            {{ $company->company_name ?? $company->name }}
+                                        </a>
+                                        <p class="company-card-location">
+                                            {{ trim(($company->city ? $company->city : '') . ' ' . ($company->country ? '• '.$company->country : '')) ?: 'Location undisclosed' }}
+                                        </p>
+                                    </div>
+                                    <div class="company-status">
+                                        <span class="status-chip {{ $company->status === 'active' ? 'status-active' : 'status-muted' }}">
                                             {{ ucfirst($company->status ?? 'inactive') }}
                                         </span>
                                         @if($company->website)
-                                            <div style="margin-top: 10px;">
-                                                <a href="{{ $company->website }}" target="_blank" class="btn-primary btn-sm">Visit Website</a>
-                                            </div>
+                                            <a href="{{ $company->website }}" target="_blank" rel="noopener" class="btn btn-light btn-sm" style="margin-top:8px;">Website</a>
                                         @endif
                                     </div>
                                 </div>
-                            </div>
+                                <div class="company-card-tags">
+                                    @if($company->industry)
+                                        <span class="tag">{{ $company->industry }}</span>
+                                    @endif
+                                    @if($company->company_size)
+                                        <span class="tag">{{ $company->company_size }}</span>
+                                    @endif
+                                    @if($company->organization_type)
+                                        <span class="tag">{{ $company->organization_type }}</span>
+                                    @endif
+                                </div>
+                                <div class="company-card-footer">
+                                    <div>
+                                        <p class="eyebrow" style="margin-bottom:4px;">Open roles</p>
+                                        <p class="company-openings">
+                                            {{ $company->active_jobs_count ?? 0 }} active {{ Str::plural('job', $company->active_jobs_count ?? 0) }}
+                                        </p>
+                                    </div>
+                                    <a href="{{ route('companies.show', $company) }}" class="btn-primary btn-sm">View profile</a>
+                                </div>
+                            </article>
                         @endforeach
                     </div>
 
-                    <div style="margin-top: 20px;">
+                    <div class="companies-pagination">
                         {{ $companies->appends(request()->query())->links('components.pagination') }}
                     </div>
                 @endif
@@ -102,5 +190,196 @@
         </div>
     </div>
 </div>
+
+<style>
+    .companies-shell {
+        margin-bottom: 40px;
+    }
+    .companies-wrapper {
+        padding: 32px;
+    }
+    .companies-grid {
+        display: grid;
+        grid-template-columns: 320px 1fr;
+        gap: 30px;
+    }
+    .companies-filter-panel {
+        border: 1px solid #e2e8f0;
+        border-radius: 18px;
+        padding: 24px;
+        background: #f8fafc;
+        position: sticky;
+        top: 24px;
+        align-self: start;
+    }
+    .filter-panel-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 18px;
+    }
+    .filter-panel-header h2 {
+        margin: 0;
+        font-size: 20px;
+    }
+    .filter-reset {
+        font-size: 14px;
+        color: #2563eb;
+    }
+    .filter-group {
+        margin-bottom: 18px;
+    }
+    .filter-label {
+        font-weight: 600;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+        color: #475569;
+        margin-bottom: 6px;
+        display: block;
+    }
+    .filter-actions {
+        display: flex;
+        gap: 12px;
+    }
+    .toggle {
+        display: flex;
+        gap: 8px;
+        font-size: 14px;
+        align-items: center;
+    }
+    .companies-results-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+    .companies-results-header h1 {
+        margin: 4px 0 0;
+        font-size: 26px;
+    }
+    .companies-result-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 20px;
+    }
+    .company-card {
+        border: 1px solid #e2e8f0;
+        border-radius: 18px;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        background: #fff;
+    }
+    .company-card-header {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        gap: 16px;
+        align-items: center;
+    }
+    .company-avatar {
+        width: 54px;
+        height: 54px;
+        border-radius: 16px;
+        background: #e0e7ff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        font-weight: 700;
+        color: #1d4ed8;
+        font-size: 18px;
+    }
+    .company-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .company-card-title {
+        font-size: 20px;
+        font-weight: 600;
+        text-decoration: none;
+        color: #0f172a;
+    }
+    .company-card-location {
+        margin: 4px 0 0;
+        color: #64748b;
+        font-size: 14px;
+    }
+    .company-status {
+        text-align: right;
+    }
+    .status-chip {
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 600;
+        display: inline-block;
+    }
+    .status-active {
+        background: #dcfce7;
+        color: #15803d;
+    }
+    .status-muted {
+        background: #e2e8f0;
+        color: #475569;
+    }
+    .company-card-tags {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+    .tag {
+        background: #eef2ff;
+        color: #1d4ed8;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+    .company-card-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .company-openings {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+    }
+    .companies-pagination {
+        margin-top: 24px;
+    }
+    .empty-state {
+        border: 1px dashed #cbd5f5;
+        border-radius: 16px;
+        padding: 32px;
+        text-align: center;
+    }
+    .eyebrow {
+        margin: 0;
+        font-size: 13px;
+        letter-spacing: .08em;
+        color: #94a3b8;
+        text-transform: uppercase;
+    }
+    @media screen and (max-width: 1024px) {
+        .companies-grid {
+            grid-template-columns: 1fr;
+        }
+        .companies-filter-panel {
+            position: static;
+        }
+        .company-card-header {
+            grid-template-columns: 1fr;
+            text-align: left;
+        }
+        .company-status {
+            text-align: left;
+        }
+    }
+</style>
 @endsection
 
