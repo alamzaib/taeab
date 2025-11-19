@@ -12,7 +12,7 @@ class DashboardController extends Controller
 {
     public function index(Request $request)
     {
-        $company = Auth::guard('company')->user();
+        $company = Auth::guard('company')->user()->load('package');
         $stats = [
             'total_jobs' => Job::where('company_id', $company->id)->count(),
             'active_jobs' => Job::where('company_id', $company->id)->where('status', 'published')->count(),

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -31,6 +32,7 @@ class Company extends Authenticatable
         'organization_type',
         'about',
         'unique_code',
+        'package_id',
     ];
 
     protected $hidden = [
@@ -54,6 +56,16 @@ class Company extends Authenticatable
     public function reviews(): HasMany
     {
         return $this->hasMany(CompanyReview::class);
+    }
+
+    public function package(): BelongsTo
+    {
+        return $this->belongsTo(Package::class);
+    }
+
+    public function packageRequests(): HasMany
+    {
+        return $this->hasMany(CompanyPackageRequest::class);
     }
 
     public function getLogoUrlAttribute(): ?string

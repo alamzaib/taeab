@@ -40,6 +40,14 @@
             'background' => '#e0f2fe',
             'border' => '#bae6fd',
         ],
+        [
+            'label' => 'Packages',
+            'desc' => 'Select & manage plan',
+            'route' => route('company.packages.index'),
+            'match' => ['company.packages.*'],
+            'background' => '#f3e8ff',
+            'border' => '#d8b4fe',
+        ],
     ];
 @endphp
 

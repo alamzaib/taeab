@@ -139,6 +139,8 @@ Route::prefix('company')->group(function () {
             'update' => 'company.jobs.update',
             'destroy' => 'company.jobs.destroy',
         ]);
+        Route::get('/packages', [App\Http\Controllers\Company\PackageController::class, 'index'])->name('company.packages.index');
+        Route::post('/packages/request', [App\Http\Controllers\Company\PackageController::class, 'request'])->name('company.packages.request');
     });
 });
 
@@ -170,6 +172,9 @@ Route::prefix('admin')->group(function () {
             'update' => 'admin.pages.update',
             'destroy' => 'admin.pages.destroy',
         ]);
+        Route::get('/packages/requests', [App\Http\Controllers\Admin\PackageController::class, 'requests'])->name('admin.packages.requests');
+        Route::post('/packages/requests/{packageRequest}/approve', [App\Http\Controllers\Admin\PackageController::class, 'approve'])->name('admin.packages.approve');
+        Route::post('/packages/requests/{packageRequest}/reject', [App\Http\Controllers\Admin\PackageController::class, 'reject'])->name('admin.packages.reject');
 
         // User Management Routes
         Route::prefix('users')->name('admin.users.')->group(function () {

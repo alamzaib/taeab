@@ -34,6 +34,32 @@
         <p style="margin:6px 0 12px; color:#92400e;">Add fresh photos & testimonials to attract better talent.</p>
         <a href="{{ route('company.dashboard', ['tab' => 'profile']) }}" class="btn-primary" style="width:fit-content;">Refresh profile</a>
     </div>
+    <div class="card" style="border:1px solid #e2e8f0;">
+        <p style="margin:0; color:#64748b; font-size:13px;">Current Package</p>
+        <div style="margin-top:6px;">
+            @if($company->package)
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="font-size:24px; font-weight:700; color:#0f172a;">{{ $company->package->display_name }}</span>
+                    @if($company->package->price > 0)
+                        <span style="font-size:14px; color:#64748b;">${{ number_format($company->package->price, 2) }}/mo</span>
+                    @else
+                        <span style="font-size:14px; color:#64748b;">Free</span>
+                    @endif
+                </div>
+                @if($company->package->features)
+                    <p style="margin:8px 0 0; font-size:12px; color:#64748b;">
+                        {{ implode(', ', array_slice($company->package->features, 0, 2)) }}
+                        @if(count($company->package->features) > 2)
+                            <span>+{{ count($company->package->features) - 2 }} more</span>
+                        @endif
+                    </p>
+                @endif
+            @else
+                <span style="font-size:18px; font-weight:600; color:#64748b;">No package assigned</span>
+            @endif
+        </div>
+        <a href="{{ route('company.packages.index') }}" class="btn btn-sm btn-light" style="margin-top:12px; width:fit-content;">Manage Package</a>
+    </div>
 </div>
 
 <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:22px; margin-bottom:28px;">
