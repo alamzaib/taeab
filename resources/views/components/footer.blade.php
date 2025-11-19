@@ -25,6 +25,7 @@
                     <li><a href="{{ url('/') }}">Home</a></li>
                     <li><a href="{{ url('/jobs') }}">Browse Jobs</a></li>
                     <li><a href="{{ url('/companies') }}">Companies</a></li>
+                    <li><a href="{{ route('blog.index') }}">Blog</a></li>
                     <li><a href="{{ route('contact') }}">Contact Us</a></li>
                     <li><a href="{{ route('seeker.register') }}">Job Seeker Registration</a></li>
                     <li><a href="{{ route('company.register') }}">Company Registration</a></li>

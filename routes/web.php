@@ -25,10 +25,19 @@ use App\Http\Controllers\Agent\ProfileController as AgentProfileController;
 use App\Http\Controllers\Seeker\ResumeController as SeekerResumeController;
 use App\Http\Controllers\CompanyListingController;
 use App\Http\Controllers\PublicSeekerController;
+use App\Http\Controllers\BlogController;
+use App\Models\Company;
 
 // Home page
 Route::get('/', function () {
-    return view('home');
+    $featuredCompanies = Company::with('package')
+        ->whereHas('package', fn($q) => $q->where('name', 'platinum'))
+        ->where('status', 'active')
+        ->orderByDesc('updated_at')
+        ->take(6)
+        ->get();
+
+    return view('home', compact('featuredCompanies'));
 });
 
 Route::get('/jobs', [JobListingController::class, 'index'])->name('jobs.index');
@@ -51,6 +60,8 @@ Route::post('/jobs/{slug}/apply', [JobApplicationController::class, 'store'])->m
 Route::post('/jobs/{slug}/favorite', [JobListingController::class, 'toggleFavorite'])->middleware('auth:seeker')->name('jobs.favorite');
 Route::get('/contact', [App\Http\Controllers\ContactController::class, 'index'])->name('contact');
 Route::post('/contact', [App\Http\Controllers\ContactController::class, 'store'])->name('contact.store');
+Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
+Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 Route::get('/login', fn () => redirect()->route('seeker.login'))->name('login');
 
 Route::fallback(function () {
@@ -224,6 +235,14 @@ Route::prefix('admin')->group(function () {
         Route::get('/packages/requests', [App\Http\Controllers\Admin\PackageController::class, 'requests'])->name('admin.packages.requests');
         Route::post('/packages/requests/{packageRequest}/approve', [App\Http\Controllers\Admin\PackageController::class, 'approve'])->name('admin.packages.approve');
         Route::post('/packages/requests/{packageRequest}/reject', [App\Http\Controllers\Admin\PackageController::class, 'reject'])->name('admin.packages.reject');
+        Route::resource('blog-posts', App\Http\Controllers\Admin\BlogPostController::class)->except(['show'])->names([
+            'index' => 'admin.blog-posts.index',
+            'create' => 'admin.blog-posts.create',
+            'store' => 'admin.blog-posts.store',
+            'edit' => 'admin.blog-posts.edit',
+            'update' => 'admin.blog-posts.update',
+            'destroy' => 'admin.blog-posts.destroy',
+        ]);
 
         // User Management Routes
         Route::prefix('users')->name('admin.users.')->group(function () {

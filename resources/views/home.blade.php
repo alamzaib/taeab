@@ -3,6 +3,9 @@
 @section('title', 'Job Portal UAE - Find Your Dream Job')
 
 @section('content')
+@php
+    $featuredCompanies = $featuredCompanies ?? collect();
+@endphp
 <!-- Hero Section -->
 <section class="hero-section">
     <div class="hero-container">
@@ -73,6 +76,54 @@
         </div>
     </div>
 </section>
+
+@if($featuredCompanies->isNotEmpty())
+<!-- Featured Companies Section -->
+<section class="featured-companies-section">
+    <div class="container">
+        <div class="featured-companies-header">
+            <div>
+                <p class="section-eyebrow">Premium Employers</p>
+                <h2 class="section-title">Platinum Featured Companies</h2>
+                <p class="section-subtitle">Trusted organizations invested in premium hiring experiences.</p>
+            </div>
+            <a href="{{ url('/companies') }}" class="featured-companies-link">Browse all companies</a>
+        </div>
+        <div class="featured-companies-grid">
+            @foreach($featuredCompanies as $company)
+                <article class="featured-company-card">
+                    <div class="featured-company-logo">
+                        @if(!empty($company->logo_url))
+                            <img src="{{ $company->logo_url }}" alt="{{ $company->company_name ?? $company->name }}">
+                        @else
+                            <span>{{ strtoupper(substr($company->company_name ?? $company->name, 0, 1)) }}</span>
+                        @endif
+                    </div>
+                    <div class="featured-company-body">
+                        <div class="featured-company-meta">
+                            <span class="platinum-chip">Platinum Partner</span>
+                            <p class="featured-company-location">
+                                {{ trim(($company->city ? $company->city : '') . ($company->country ? ', '.$company->country : '')) ?: 'UAE' }}
+                            </p>
+                        </div>
+                        <h3><a href="{{ route('companies.show', $company) }}">{{ $company->company_name ?? $company->name }}</a></h3>
+                        <p class="featured-company-description">
+                            {{ $company->short_description ?? 'Leading employer with premium hiring needs.' }}
+                        </p>
+                    </div>
+                    <a href="{{ route('companies.show', $company) }}" class="featured-company-action">
+                        View Profile
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                    </a>
+                </article>
+            @endforeach
+        </div>
+    </div>
+</section>
+@endif
 
 <!-- Popular Jobs Section -->
 <section class="jobs-section">
@@ -326,6 +377,131 @@
     margin: 0;
 }
 
+.featured-companies-section {
+    padding: 70px 20px;
+    background: #ffffff;
+}
+
+.featured-companies-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 20px;
+    margin-bottom: 32px;
+}
+
+.section-eyebrow {
+    text-transform: uppercase;
+    letter-spacing: .3em;
+    font-size: 12px;
+    color: #94a3b8;
+    margin-bottom: 6px;
+}
+
+.section-subtitle {
+    color: #64748b;
+    margin-top: 10px;
+}
+
+.featured-companies-link {
+    color: #235181;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.featured-companies-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 20px;
+}
+
+.featured-company-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 18px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    box-shadow: 0 15px 40px rgba(15, 23, 42, 0.08);
+}
+
+.featured-company-logo {
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    background: #eef2ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: #4c1d95;
+    overflow: hidden;
+}
+
+.featured-company-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.platinum-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: rgba(234, 179, 8, 0.15);
+    color: #a16207;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.featured-company-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.featured-company-location {
+    color: #94a3b8;
+    font-size: 13px;
+    margin: 0;
+}
+
+.featured-company-body h3 {
+    margin: 10px 0 8px;
+    font-size: 22px;
+}
+
+.featured-company-body h3 a {
+    text-decoration: none;
+    color: #0f172a;
+}
+
+.featured-company-description {
+    color: #475569;
+    margin: 0;
+}
+
+.featured-company-action {
+    margin-top: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #235181;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.featured-company-action svg {
+    transition: transform 0.2s ease;
+}
+
+.featured-company-action:hover svg {
+    transform: translateX(4px);
+}
+
 @media (max-width: 768px) {
     .hero-title {
         font-size: 32px;
@@ -345,6 +521,16 @@
     
     .section-title {
         font-size: 28px;
+    }
+
+    .featured-companies-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .featured-company-meta {
+        flex-direction: column;
+        align-items: flex-start;
     }
 }
 </style>
