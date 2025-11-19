@@ -87,6 +87,13 @@ class SettingsController extends Controller
             'latitude',
             'city',
             'country',
+            'smtp_host',
+            'smtp_port',
+            'smtp_username',
+            'smtp_password',
+            'smtp_encryption',
+            'smtp_from_address',
+            'smtp_from_name',
         ];
 
         foreach ($textSettings as $key) {

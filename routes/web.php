@@ -49,6 +49,8 @@ Route::get('/jobs/{slug}', [JobListingController::class, 'show'])->name('jobs.sh
 Route::get('/jobs/{slug}/apply', [JobApplicationController::class, 'create'])->middleware('auth:seeker')->name('jobs.apply.form');
 Route::post('/jobs/{slug}/apply', [JobApplicationController::class, 'store'])->middleware('auth:seeker')->name('jobs.apply');
 Route::post('/jobs/{slug}/favorite', [JobListingController::class, 'toggleFavorite'])->middleware('auth:seeker')->name('jobs.favorite');
+Route::get('/contact', [App\Http\Controllers\ContactController::class, 'index'])->name('contact');
+Route::post('/contact', [App\Http\Controllers\ContactController::class, 'store'])->name('contact.store');
 Route::get('/login', fn () => redirect()->route('seeker.login'))->name('login');
 
 Route::fallback(function () {
@@ -185,6 +187,8 @@ Route::prefix('admin')->group(function () {
         Route::post('/settings/experience-levels', [App\Http\Controllers\Admin\ExperienceLevelController::class, 'store'])->name('admin.settings.experience-levels.store');
         Route::put('/settings/experience-levels/{experienceLevel}', [App\Http\Controllers\Admin\ExperienceLevelController::class, 'update'])->name('admin.settings.experience-levels.update');
         Route::delete('/settings/experience-levels/{experienceLevel}', [App\Http\Controllers\Admin\ExperienceLevelController::class, 'destroy'])->name('admin.settings.experience-levels.destroy');
+        Route::get('/settings/smtp', [App\Http\Controllers\Admin\SmtpSettingsController::class, 'index'])->name('admin.settings.smtp');
+        Route::post('/settings/smtp', [App\Http\Controllers\Admin\SmtpSettingsController::class, 'update'])->name('admin.settings.smtp.update');
         
         // API route for cities (admin)
         Route::get('/api/cities', function(\Illuminate\Http\Request $request) {

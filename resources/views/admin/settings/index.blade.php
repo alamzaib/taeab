@@ -39,6 +39,11 @@
             Experience Levels
         </a>
     </li>
+    <li class="nav-item">
+        <a class="nav-link {{ $activeTab === 'smtp' ? 'active' : '' }}" href="{{ route('admin.settings.smtp') }}">
+            SMTP Settings
+        </a>
+    </li>
 </ul>
 
 @if($activeTab === 'general')
@@ -207,6 +212,8 @@
         @include('admin.settings.tabs.job-types')
     @elseif($activeTab === 'experience-levels')
         @include('admin.settings.tabs.experience-levels')
+    @elseif($activeTab === 'smtp')
+        @include('admin.settings.tabs.smtp')
     @endif
 @endif
 
