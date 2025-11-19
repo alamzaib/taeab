@@ -142,6 +142,20 @@ Route::prefix('company')->group(function () {
         Route::post('/jobs/{job}/renew', [App\Http\Controllers\Company\JobController::class, 'renew'])->name('company.jobs.renew');
         Route::get('/packages', [App\Http\Controllers\Company\PackageController::class, 'index'])->name('company.packages.index');
         Route::post('/packages/request', [App\Http\Controllers\Company\PackageController::class, 'request'])->name('company.packages.request');
+        
+        // API route for cities (company)
+        Route::get('/api/cities', function(\Illuminate\Http\Request $request) {
+            $countryId = $request->get('country_id');
+            if ($countryId) {
+                $cities = \App\Models\City::where('country_id', $countryId)
+                    ->where('is_active', true)
+                    ->orderBy('sort_order')
+                    ->orderBy('name')
+                    ->get(['id', 'name']);
+                return response()->json($cities);
+            }
+            return response()->json([]);
+        })->name('company.api.cities');
     });
 });
 
@@ -155,6 +169,36 @@ Route::prefix('admin')->group(function () {
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
         Route::get('/settings', [App\Http\Controllers\Admin\SettingsController::class, 'index'])->name('admin.settings.index');
         Route::post('/settings', [App\Http\Controllers\Admin\SettingsController::class, 'update'])->name('admin.settings.update');
+        Route::get('/settings/countries', [App\Http\Controllers\Admin\CountryController::class, 'index'])->name('admin.settings.countries');
+        Route::post('/settings/countries', [App\Http\Controllers\Admin\CountryController::class, 'store'])->name('admin.settings.countries.store');
+        Route::put('/settings/countries/{country}', [App\Http\Controllers\Admin\CountryController::class, 'update'])->name('admin.settings.countries.update');
+        Route::delete('/settings/countries/{country}', [App\Http\Controllers\Admin\CountryController::class, 'destroy'])->name('admin.settings.countries.destroy');
+        Route::get('/settings/cities', [App\Http\Controllers\Admin\CityController::class, 'index'])->name('admin.settings.cities');
+        Route::post('/settings/cities', [App\Http\Controllers\Admin\CityController::class, 'store'])->name('admin.settings.cities.store');
+        Route::put('/settings/cities/{city}', [App\Http\Controllers\Admin\CityController::class, 'update'])->name('admin.settings.cities.update');
+        Route::delete('/settings/cities/{city}', [App\Http\Controllers\Admin\CityController::class, 'destroy'])->name('admin.settings.cities.destroy');
+        Route::get('/settings/job-types', [App\Http\Controllers\Admin\JobTypeController::class, 'index'])->name('admin.settings.job-types');
+        Route::post('/settings/job-types', [App\Http\Controllers\Admin\JobTypeController::class, 'store'])->name('admin.settings.job-types.store');
+        Route::put('/settings/job-types/{jobType}', [App\Http\Controllers\Admin\JobTypeController::class, 'update'])->name('admin.settings.job-types.update');
+        Route::delete('/settings/job-types/{jobType}', [App\Http\Controllers\Admin\JobTypeController::class, 'destroy'])->name('admin.settings.job-types.destroy');
+        Route::get('/settings/experience-levels', [App\Http\Controllers\Admin\ExperienceLevelController::class, 'index'])->name('admin.settings.experience-levels');
+        Route::post('/settings/experience-levels', [App\Http\Controllers\Admin\ExperienceLevelController::class, 'store'])->name('admin.settings.experience-levels.store');
+        Route::put('/settings/experience-levels/{experienceLevel}', [App\Http\Controllers\Admin\ExperienceLevelController::class, 'update'])->name('admin.settings.experience-levels.update');
+        Route::delete('/settings/experience-levels/{experienceLevel}', [App\Http\Controllers\Admin\ExperienceLevelController::class, 'destroy'])->name('admin.settings.experience-levels.destroy');
+        
+        // API route for cities (admin)
+        Route::get('/api/cities', function(\Illuminate\Http\Request $request) {
+            $countryId = $request->get('country_id');
+            if ($countryId) {
+                $cities = \App\Models\City::where('country_id', $countryId)
+                    ->where('is_active', true)
+                    ->orderBy('sort_order')
+                    ->orderBy('name')
+                    ->get(['id', 'name']);
+                return response()->json($cities);
+            }
+            return response()->json([]);
+        })->name('api.cities');
         Route::resource('jobs', AdminJobController::class)->except(['show'])->names([
             'index' => 'admin.jobs.index',
             'create' => 'admin.jobs.create',

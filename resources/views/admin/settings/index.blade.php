@@ -5,10 +5,43 @@
 
 @section('breadcrumb')
     <li class="breadcrumb-item"><a href="{{ route('admin.settings.index') }}">Settings</a></li>
-    <li class="breadcrumb-item active">General</li>
+    <li class="breadcrumb-item active">{{ ucfirst($tab ?? 'general') }}</li>
 @endsection
 
 @section('content')
+@php
+    $activeTab = $tab ?? 'general';
+@endphp
+
+<ul class="nav nav-tabs" role="tablist" style="margin-bottom: 20px;">
+    <li class="nav-item">
+        <a class="nav-link {{ $activeTab === 'general' ? 'active' : '' }}" href="{{ route('admin.settings.index', ['tab' => 'general']) }}">
+            General Settings
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {{ $activeTab === 'countries' ? 'active' : '' }}" href="{{ route('admin.settings.countries') }}">
+            Countries
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {{ $activeTab === 'cities' ? 'active' : '' }}" href="{{ route('admin.settings.cities') }}">
+            Cities
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {{ $activeTab === 'job-types' ? 'active' : '' }}" href="{{ route('admin.settings.job-types') }}">
+            Job Types
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {{ $activeTab === 'experience-levels' ? 'active' : '' }}" href="{{ route('admin.settings.experience-levels') }}">
+            Experience Levels
+        </a>
+    </li>
+</ul>
+
+@if($activeTab === 'general')
 <div class="card">
     <div class="card-header">
         <h3 class="card-title">Application Settings</h3>
@@ -165,6 +198,17 @@
         </div>
     </form>
 </div>
+@else
+    @if($activeTab === 'countries')
+        @include('admin.settings.tabs.countries')
+    @elseif($activeTab === 'cities')
+        @include('admin.settings.tabs.cities')
+    @elseif($activeTab === 'job-types')
+        @include('admin.settings.tabs.job-types')
+    @elseif($activeTab === 'experience-levels')
+        @include('admin.settings.tabs.experience-levels')
+    @endif
+@endif
 
 <style>
 .settings-section {

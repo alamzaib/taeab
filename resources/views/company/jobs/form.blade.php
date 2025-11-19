@@ -12,27 +12,92 @@
 </div>
 
 <div class="form-row">
-    <div class="form-group col-md-6">
-        <label for="location">Location</label>
-        <input type="text" name="location" id="location" class="form-control @error('location') is-invalid @enderror"
-               value="{{ old('location', $job->location ?? '') }}">
-        @error('location')
+    <div class="form-group col-md-3">
+        <label for="country">Country</label>
+        <select name="country" id="country" class="form-control @error('country') is-invalid @enderror">
+            <option value="">Select Country</option>
+            @php
+                $selectedCountry = old('country', '');
+                if (!$selectedCountry && $job->location) {
+                    $locationParts = explode(',', trim($job->location));
+                    if (count($locationParts) >= 2) {
+                        $selectedCountry = trim($locationParts[1]);
+                    }
+                }
+            @endphp
+            @foreach(\App\Models\Country::where('is_active', true)->orderBy('sort_order')->orderBy('name')->get() as $country)
+                <option value="{{ $country->id }}" data-name="{{ $country->name }}" {{ $selectedCountry == $country->id || $selectedCountry === $country->name ? 'selected' : '' }}>
+                    {{ $country->name }}
+                </option>
+            @endforeach
+        </select>
+        @error('country')
+            <span class="invalid-feedback">{{ $message }}</span>
+        @enderror
+    </div>
+    <div class="form-group col-md-3">
+        <label for="city">City</label>
+        <select name="city" id="city" class="form-control @error('city') is-invalid @enderror">
+            <option value="">Select City</option>
+            @php
+                $selectedCity = old('city', '');
+                if (!$selectedCity && $job->location) {
+                    $locationParts = explode(',', trim($job->location));
+                    if (count($locationParts) >= 1) {
+                        $selectedCity = trim($locationParts[0]);
+                    }
+                }
+                $selectedCountryId = old('country', '');
+                if (!$selectedCountryId && $job->location) {
+                    $locationParts = explode(',', trim($job->location));
+                    if (count($locationParts) >= 2) {
+                        $countryName = trim($locationParts[1]);
+                        $countryModel = \App\Models\Country::where('name', $countryName)->first();
+                        if ($countryModel) {
+                            $selectedCountryId = $countryModel->id;
+                        }
+                    }
+                }
+                if ($selectedCountryId) {
+                    $cities = \App\Models\City::where('country_id', $selectedCountryId)->where('is_active', true)->orderBy('sort_order')->orderBy('name')->get();
+                }
+            @endphp
+            @if(isset($cities))
+                @foreach($cities as $city)
+                    <option value="{{ $city->id }}" data-name="{{ $city->name }}" {{ $selectedCity == $city->id || $selectedCity === $city->name ? 'selected' : '' }}>
+                        {{ $city->name }}
+                    </option>
+                @endforeach
+            @endif
+        </select>
+        @error('city')
             <span class="invalid-feedback">{{ $message }}</span>
         @enderror
     </div>
     <div class="form-group col-md-3">
         <label for="job_type">Job Type</label>
-        <input type="text" name="job_type" id="job_type" class="form-control @error('job_type') is-invalid @enderror"
-               value="{{ old('job_type', $job->job_type ?? '') }}">
+        <select name="job_type" id="job_type" class="form-control @error('job_type') is-invalid @enderror">
+            <option value="">Select Job Type</option>
+            @foreach(\App\Models\JobType::where('is_active', true)->orderBy('sort_order')->orderBy('name')->get() as $jobType)
+                <option value="{{ $jobType->name }}" {{ old('job_type', $job->job_type ?? '') === $jobType->name ? 'selected' : '' }}>
+                    {{ $jobType->name }}
+                </option>
+            @endforeach
+        </select>
         @error('job_type')
             <span class="invalid-feedback">{{ $message }}</span>
         @enderror
     </div>
     <div class="form-group col-md-3">
         <label for="experience_level">Experience Level</label>
-        <input type="text" name="experience_level" id="experience_level"
-               class="form-control @error('experience_level') is-invalid @enderror"
-               value="{{ old('experience_level', $job->experience_level ?? '') }}">
+        <select name="experience_level" id="experience_level" class="form-control @error('experience_level') is-invalid @enderror">
+            <option value="">Select Experience Level</option>
+            @foreach(\App\Models\ExperienceLevel::where('is_active', true)->orderBy('sort_order')->orderBy('name')->get() as $experienceLevel)
+                <option value="{{ $experienceLevel->name }}" {{ old('experience_level', $job->experience_level ?? '') === $experienceLevel->name ? 'selected' : '' }}>
+                    {{ $experienceLevel->name }}
+                </option>
+            @endforeach
+        </select>
         @error('experience_level')
             <span class="invalid-feedback">{{ $message }}</span>
         @enderror
@@ -112,4 +177,42 @@
         <span class="invalid-feedback">{{ $message }}</span>
     @enderror
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const countrySelect = document.getElementById('country');
+    const citySelect = document.getElementById('city');
+    
+    if (countrySelect && citySelect) {
+        countrySelect.addEventListener('change', function() {
+            const countryId = this.value;
+            citySelect.innerHTML = '<option value="">Select City</option>';
+            
+            if (countryId) {
+                fetch(`/company/api/cities?country_id=${countryId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        data.forEach(city => {
+                            const option = document.createElement('option');
+                            option.value = city.id;
+                            option.setAttribute('data-name', city.name);
+                            option.textContent = city.name;
+                            citySelect.appendChild(option);
+                        });
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
+        });
+        
+        // Trigger change on load if country is selected
+        if (countrySelect.value) {
+            setTimeout(() => {
+                countrySelect.dispatchEvent(new Event('change'));
+            }, 100);
+        }
+    }
+});
+</script>
+@endpush
 

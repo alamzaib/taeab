@@ -39,6 +39,15 @@ class JobController extends Controller
         $data['company_id'] = $company->id;
         $data['slug'] = $this->generateSlug($data['title']);
 
+        // Handle location from country and city
+        if ($request->filled('city') && $request->filled('country')) {
+            $data['location'] = $request->city . ', ' . $request->country;
+        } elseif ($request->filled('location')) {
+            // Keep existing location if provided directly
+        } else {
+            $data['location'] = null;
+        }
+
         // Only allow featured for Gold package companies
         if (isset($data['featured']) && $data['featured']) {
             if (!$company->package || $company->package->name !== 'gold') {
@@ -74,6 +83,15 @@ class JobController extends Controller
 
         if ($job->title !== $data['title']) {
             $data['slug'] = $this->generateSlug($data['title']);
+        }
+
+        // Handle location from country and city
+        if ($request->filled('city') && $request->filled('country')) {
+            $data['location'] = $request->city . ', ' . $request->country;
+        } elseif ($request->filled('location')) {
+            // Keep existing location if provided directly
+        } else {
+            $data['location'] = null;
         }
 
         // Only allow featured for Gold package companies
@@ -125,6 +143,8 @@ class JobController extends Controller
         return $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'location' => ['nullable', 'string', 'max:255'],
+            'country' => ['nullable', 'exists:countries,id'],
+            'city' => ['nullable', 'exists:cities,id'],
             'job_type' => ['nullable', 'string', 'max:100'],
             'experience_level' => ['nullable', 'string', 'max:100'],
             'salary_min' => ['nullable', 'numeric', 'min:0'],

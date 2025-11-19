@@ -25,5 +25,6 @@
             <a href="{{ route('company.dashboard', ['tab' => 'jobs']) }}" class="btn btn-secondary">Cancel</a>
         </div>
     </form>
+
 @endsection
 

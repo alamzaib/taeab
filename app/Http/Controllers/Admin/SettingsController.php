@@ -10,10 +10,11 @@ use Illuminate\Support\Facades\Validator;
 
 class SettingsController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $settings = Setting::getAll();
-        return view('admin.settings.index', compact('settings'));
+        $tab = $request->get('tab', 'general');
+        return view('admin.settings.index', compact('settings', 'tab'));
     }
 
     public function update(Request $request)
