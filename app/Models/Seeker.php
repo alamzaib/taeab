@@ -85,6 +85,11 @@ class Seeker extends Authenticatable
         return $this->hasMany(JobDocument::class);
     }
 
+    public function companyReviews(): HasMany
+    {
+        return $this->hasMany(CompanyReview::class);
+    }
+
     public function favorites(): HasMany
     {
         return $this->hasMany(JobFavorite::class);

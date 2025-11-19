@@ -51,6 +51,11 @@ class Company extends Authenticatable
         return $this->hasMany(Job::class);
     }
 
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(CompanyReview::class);
+    }
+
     public function getLogoUrlAttribute(): ?string
     {
         $path = $this->normalizeStoragePath($this->logo_path);

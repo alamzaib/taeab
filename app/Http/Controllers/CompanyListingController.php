@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Company;
 use App\Models\Job;
+use App\Models\CompanyReview;
 use Illuminate\Http\Request;
 
 class CompanyListingController extends Controller
@@ -73,7 +74,7 @@ class CompanyListingController extends Controller
                 break;
         }
 
-        $companies = $query->paginate(12)->withQueryString();
+        $companies = $query->withAvg('reviews', 'rating')->paginate(12)->withQueryString();
 
         $industries = Company::whereNotNull('industry')
             ->distinct()
@@ -119,32 +120,29 @@ class CompanyListingController extends Controller
             ->take(5)
             ->get();
 
-        $recentApplications = Job::where('company_id', $company->id)
-            ->with(['applications' => function ($query) {
-                $query->latest()
-                    ->whereNotNull('cover_letter')
-                    ->take(3)
-                    ->with('seeker');
-            }])
+        $reviews = CompanyReview::where('company_id', $company->id)
+            ->with('seeker')
+            ->latest()
             ->get();
 
-        $reviews = $recentApplications->flatMap(function ($job) {
-            return $job->applications->map(function ($application) use ($job) {
-                return [
-                    'seeker' => $application->seeker?->name ?? 'Job seeker',
-                    'submitted_at' => $application->created_at,
-                    'job_title' => $job->title,
-                    'content' => $application->cover_letter ?? '',
-                ];
-            });
-        })->take(3);
+        $topReviews = $reviews->take(5);
+        $totalReviews = $reviews->count();
+        $averageRating = $reviews->avg('rating') ?? 0;
 
         $stats = [
             'total_jobs' => Job::where('company_id', $company->id)->count(),
             'active_jobs' => Job::where('company_id', $company->id)->where('status', 'published')->count(),
         ];
 
-        return view('companies.show', compact('company', 'activeJobs', 'stats', 'reviews'));
+        // Check if current user (seeker) has already reviewed
+        $userReview = null;
+        if (auth()->guard('seeker')->check()) {
+            $userReview = CompanyReview::where('company_id', $company->id)
+                ->where('seeker_id', auth()->guard('seeker')->id())
+                ->first();
+        }
+
+        return view('companies.show', compact('company', 'activeJobs', 'stats', 'topReviews', 'totalReviews', 'averageRating', 'userReview'));
     }
 }
 

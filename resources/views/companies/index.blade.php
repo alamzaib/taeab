@@ -134,28 +134,38 @@
                         @foreach($companies as $company)
                             <article class="company-card">
                                 <div class="company-card-header">
-                                    <div class="company-avatar">
-                                        @if($company->logo_url)
-                                            <img src="{{ $company->logo_url }}" alt="{{ $company->company_name ?? $company->name }}">
-                                        @else
-                                            <span>{{ strtoupper(substr($company->company_name ?? $company->name, 0, 1)) }}</span>
-                                        @endif
+                                    <div class="company-logo-section">
+                                        <div class="company-avatar">
+                                            @if($company->logo_url)
+                                                <img src="{{ $company->logo_url }}" alt="{{ $company->company_name ?? $company->name }}">
+                                            @else
+                                                <span>{{ strtoupper(substr($company->company_name ?? $company->name, 0, 1)) }}</span>
+                                            @endif
+                                        </div>
+                                        <div class="company-status">
+                                            <span class="status-chip {{ $company->status === 'active' ? 'status-active' : 'status-muted' }}">
+                                                {{ ucfirst($company->status ?? 'inactive') }}
+                                            </span>
+                                        </div>
                                     </div>
                                     <div class="company-card-meta">
-                                        <a href="{{ route('companies.show', $company) }}" class="company-card-title">
-                                            {{ $company->company_name ?? $company->name }}
-                                        </a>
+                                        @if($company->reviews_avg_rating && $company->reviews_avg_rating > 0)
+                                            <div class="company-rating-stars" title="Average rating: {{ number_format($company->reviews_avg_rating, 1) }}/5">
+                                                @for ($i = 1; $i <= 5; $i++)
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="{{ $i <= round($company->reviews_avg_rating) ? '#ffb347' : '#e2e8f0' }}">
+                                                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                                                    </svg>
+                                                @endfor
+                                            </div>
+                                        @endif
+                                        <div class="company-name-wrapper">
+                                            <a href="{{ route('companies.show', $company) }}" class="company-card-title">
+                                                {{ $company->company_name ?? $company->name }}
+                                            </a>
+                                        </div>
                                         <p class="company-card-location">
                                             {{ trim(($company->city ? $company->city : '') . ' ' . ($company->country ? '• '.$company->country : '')) ?: 'Location undisclosed' }}
                                         </p>
-                                    </div>
-                                    <div class="company-status">
-                                        <span class="status-chip {{ $company->status === 'active' ? 'status-active' : 'status-muted' }}">
-                                            {{ ucfirst($company->status ?? 'inactive') }}
-                                        </span>
-                                        @if($company->website)
-                                            <a href="{{ $company->website }}" target="_blank" rel="noopener" class="btn btn-light btn-sm" style="margin-top:8px;">Website</a>
-                                        @endif
                                     </div>
                                 </div>
                                 <div class="company-card-tags">
@@ -275,9 +285,16 @@
     }
     .company-card-header {
         display: grid;
-        grid-template-columns: auto 1fr auto;
+        grid-template-columns: auto 1fr;
         gap: 16px;
+        align-items: flex-start;
+    }
+
+    .company-logo-section {
+        display: flex;
+        flex-direction: column;
         align-items: center;
+        gap: 10px;
     }
     .company-avatar {
         width: 54px;
@@ -297,11 +314,46 @@
         height: 100%;
         object-fit: cover;
     }
+    .company-name-wrapper {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        width: 100%;
+    }
+
     .company-card-title {
         font-size: 20px;
         font-weight: 600;
         text-decoration: none;
         color: #0f172a;
+        flex: 1;
+        min-width: 0;
+        word-wrap: break-word;
+        line-height: 1.4;
+    }
+
+    .company-rating-stars {
+        flex-shrink: 0;
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+        margin-top: -20px;
+        margin-left: 0px;
+    }
+
+    .company-rating-stars svg {
+        transition: transform 0.2s ease;
+    }
+
+    .company-rating-stars:hover svg {
+        transform: scale(1.1);
+    }
+    .company-card-meta {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        flex: 1;
+        min-width: 0;
     }
     .company-card-location {
         margin: 4px 0 0;
@@ -309,7 +361,7 @@
         font-size: 14px;
     }
     .company-status {
-        text-align: right;
+        text-align: center;
     }
     .status-chip {
         padding: 4px 10px;
@@ -375,6 +427,11 @@
         .company-card-header {
             grid-template-columns: 1fr;
             text-align: left;
+        }
+        .company-logo-section {
+            flex-direction: row;
+            align-items: center;
+            justify-content: flex-start;
         }
         .company-status {
             text-align: left;

@@ -34,6 +34,11 @@ Route::get('/', function () {
 Route::get('/jobs', [JobListingController::class, 'index'])->name('jobs.index');
 Route::get('/companies', [CompanyListingController::class, 'index'])->name('companies.index');
 Route::get('/companies/{company}', [CompanyListingController::class, 'show'])->name('companies.show');
+Route::get('/companies/{company}/reviews', [App\Http\Controllers\CompanyReviewController::class, 'getAllReviews'])->name('companies.reviews.all');
+Route::post('/companies/{company}/reviews', [App\Http\Controllers\CompanyReviewController::class, 'store'])->middleware('auth:seeker')->name('companies.reviews.store');
+Route::get('/reviews/{review}/edit', [App\Http\Controllers\CompanyReviewController::class, 'edit'])->middleware('auth:seeker')->name('companies.reviews.edit');
+Route::put('/reviews/{review}', [App\Http\Controllers\CompanyReviewController::class, 'update'])->middleware('auth:seeker')->name('companies.reviews.update');
+Route::post('/reviews/{review}/reply', [App\Http\Controllers\CompanyReviewController::class, 'reply'])->middleware('auth:company')->name('companies.reviews.reply');
 
 // Static Pages
 Route::redirect('/pages', '/pages/about');
