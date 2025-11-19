@@ -156,10 +156,15 @@
                 @else
                     <div class="{{ $view === 'grid' ? 'jobs-result-grid' : 'jobs-result-list' }}">
                         @foreach($jobs as $job)
-                            <article class="job-card {{ $view === 'grid' ? 'job-card-compact' : '' }}">
+                            <article class="job-card {{ $view === 'grid' ? 'job-card-compact' : '' }} {{ $job->featured ? 'job-card-featured' : '' }}">
                                 <div class="job-card-header">
                                     <div>
-                                        <a href="{{ route('jobs.show', $job->slug) }}" class="job-card-title">{{ $job->title }}</a>
+                                        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                            <a href="{{ route('jobs.show', $job->slug) }}" class="job-card-title">{{ $job->title }}</a>
+                                            @if($job->featured)
+                                                <span class="badge badge-warning" style="font-size: 10px; padding: 4px 8px; background: #fbbf24; color: #78350f;">⭐ Featured</span>
+                                            @endif
+                                        </div>
                                         <p class="job-card-meta">
                                             {{ $job->company->company_name ?? 'Company confidential' }}
                                             @if($job->location)

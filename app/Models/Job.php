@@ -26,10 +26,14 @@ class Job extends Model
         'requirements',
         'status',
         'posted_at',
+        'featured',
+        'expires_at',
     ];
 
     protected $casts = [
         'posted_at' => 'datetime',
+        'expires_at' => 'datetime',
+        'featured' => 'boolean',
         'salary_min' => 'decimal:2',
         'salary_max' => 'decimal:2',
     ];
@@ -52,6 +56,16 @@ class Job extends Model
     public function favorites(): HasMany
     {
         return $this->hasMany(JobFavorite::class);
+    }
+
+    public function isExpired(): bool
+    {
+        return $this->expires_at && $this->expires_at->isPast();
+    }
+
+    public function isActive(): bool
+    {
+        return $this->status === 'published' && !$this->isExpired();
     }
 }
 

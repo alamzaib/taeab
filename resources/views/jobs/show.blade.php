@@ -73,12 +73,12 @@
                     @if($hasApplied)
                         <span class="badge badge-success">Application submitted</span>
                     @else
-                        <a href="{{ route('jobs.apply.form', $job->slug) }}" class="btn-primary btn-lg">Apply now</a>
+                        <a href="{{ route('jobs.apply.form', $job->slug) }}" class="btn-primary btn-apply-large">Apply now</a>
                         <small>You'll review documents before submitting.</small>
                     @endif
                 @else
-                    <button id="apply-btn" class="btn-primary btn-lg">Apply now</button>
-                    <small>Login as a job seeker to start application.</small>
+                    <button id="apply-btn" class="btn-primary btn-apply-large">Apply now</button>
+                    <p class="apply-login-text">Login as a job seeker to start application</p>
                 @endif
             </div>
         </div>
@@ -207,6 +207,22 @@
         min-width: 240px;
         text-align: right;
     }
+    .btn-apply-large {
+        padding: 16px 32px !important;
+        font-size: 18px !important;
+        font-weight: 600 !important;
+        border-radius: 8px !important;
+        width: 100%;
+        max-width: 300px;
+        display: inline-block;
+        text-align: center;
+    }
+    .apply-login-text {
+        margin-top: 12px;
+        color: #64748b;
+        font-size: 14px;
+        text-align: center;
+    }
     .job-body-grid {
         display: grid;
         grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr);
@@ -255,6 +271,12 @@
             flex-direction: column;
         }
         .job-hero-cta {
+            text-align: left;
+        }
+        .btn-apply-large {
+            max-width: 100%;
+        }
+        .apply-login-text {
             text-align: left;
         }
     }

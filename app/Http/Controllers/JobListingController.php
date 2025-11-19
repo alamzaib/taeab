@@ -12,7 +12,11 @@ class JobListingController extends Controller
     public function index(Request $request)
     {
         $query = Job::with('company')
-            ->where('status', 'published');
+            ->where('status', 'published')
+            ->where(function ($q) {
+                $q->whereNull('expires_at')
+                  ->orWhere('expires_at', '>', now());
+            });
 
         if ($request->filled('q')) {
             $search = $request->q;
@@ -88,20 +92,26 @@ class JobListingController extends Controller
         if ($request->filled('sort')) {
             switch ($request->sort) {
                 case 'salary_high':
-                    $query->orderByDesc('salary_max');
+                    $query->orderByDesc('featured')
+                          ->orderByDesc('salary_max');
                     break;
                 case 'salary_low':
-                    $query->orderBy('salary_min');
+                    $query->orderByDesc('featured')
+                          ->orderBy('salary_min');
                     break;
                 case 'oldest':
-                    $query->orderBy('posted_at', 'asc');
+                    $query->orderByDesc('featured')
+                          ->orderBy('posted_at', 'asc');
                     break;
                 case 'newest':
                 default:
-                    $query->orderBy('posted_at', 'desc');
+                    $query->orderByDesc('featured')
+                          ->orderBy('posted_at', 'desc');
             }
         } else {
-            $query->orderBy('posted_at', 'desc');
+            // Default: Featured first, then by posted date
+            $query->orderByDesc('featured')
+                  ->orderBy('posted_at', 'desc');
         }
 
         $jobs = $query->paginate(12)->withQueryString();
@@ -134,6 +144,10 @@ class JobListingController extends Controller
         $job = Job::with(['company', 'agent'])
             ->where('slug', $slug)
             ->where('status', 'published')
+            ->where(function ($q) {
+                $q->whereNull('expires_at')
+                  ->orWhere('expires_at', '>', now());
+            })
             ->firstOrFail();
 
         $hasApplied = false;

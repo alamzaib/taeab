@@ -92,10 +92,20 @@
 }
 .company-dashboard .btn-primary,
 .company-dashboard .btn-primary:visited {
+    background-color: #235181 !important;
     color: #fff !important;
+    border-color: #235181 !important;
 }
 .company-dashboard .btn-primary:hover {
-    color: #fff;
+    background-color: #1a3d63 !important;
+    color: #fff !important;
+    border-color: #1a3d63 !important;
+}
+.company-dashboard .btn-primary:focus,
+.company-dashboard .btn-primary:active {
+    background-color: #1a3d63 !important;
+    color: #fff !important;
+    border-color: #1a3d63 !important;
 }
 </style>
 @endsection

@@ -69,6 +69,26 @@
     </div>
 </div>
 
+@php
+    $isGoldPackage = $company->package && $company->package->name === 'gold';
+@endphp
+
+@if($isGoldPackage)
+<div class="form-group">
+    <div class="form-check">
+        <input type="checkbox" name="featured" id="featured" value="1" class="form-check-input @error('featured') is-invalid @enderror"
+               {{ old('featured', $job->featured ?? false) ? 'checked' : '' }}>
+        <label class="form-check-label" for="featured">
+            <strong>Make this job featured</strong>
+            <small class="text-muted d-block">Featured jobs appear at the top of search results</small>
+        </label>
+        @error('featured')
+            <span class="invalid-feedback">{{ $message }}</span>
+        @enderror
+    </div>
+</div>
+@endif
+
 <div class="form-group">
     <label for="short_description">Short Description</label>
     <textarea name="short_description" id="short_description" rows="3" class="form-control @error('short_description') is-invalid @enderror">{{ old('short_description', $job->short_description ?? '') }}</textarea>

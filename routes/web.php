@@ -139,6 +139,7 @@ Route::prefix('company')->group(function () {
             'update' => 'company.jobs.update',
             'destroy' => 'company.jobs.destroy',
         ]);
+        Route::post('/jobs/{job}/renew', [App\Http\Controllers\Company\JobController::class, 'renew'])->name('company.jobs.renew');
         Route::get('/packages', [App\Http\Controllers\Company\PackageController::class, 'index'])->name('company.packages.index');
         Route::post('/packages/request', [App\Http\Controllers\Company\PackageController::class, 'request'])->name('company.packages.request');
     });
