@@ -22,7 +22,6 @@ class ProfileController extends Controller
 
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', Rule::unique('companies')->ignore($company->id)],
             'phone' => ['required', 'string', 'max:20'],
             'company_name' => ['required', 'string', 'max:255'],
             'company_size' => ['nullable', 'string', 'max:50'],
@@ -42,7 +41,7 @@ class ProfileController extends Controller
 
         $company->fill([
             'name' => $validated['name'],
-            'email' => $validated['email'],
+            // Note: Email cannot be changed
             'phone' => $validated['phone'],
             'company_name' => $validated['company_name'],
             'company_size' => $validated['company_size'] ?? null,

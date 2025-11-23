@@ -24,7 +24,9 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
-        return view('company.dashboard', compact('company', 'stats', 'recentMessages'));
+        $unreadNotificationCount = $company->unreadNotifications()->count();
+
+        return view('company.dashboard', compact('company', 'stats', 'recentMessages', 'unreadNotificationCount'));
     }
 }
 

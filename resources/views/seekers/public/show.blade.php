@@ -455,10 +455,13 @@
                     <html>
                         <head>
                             <title>Resume by Taeab - {{ $seeker->name }}</title>
+                            <link rel="preconnect" href="https://fonts.googleapis.com">
+                            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+                            <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
                             ${styles}
                             <style>
                                 body {
-                                    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                                    font-family: 'Roboto', sans-serif;
                                     margin: 0;
                                     background: #f8fafc;
                                     padding: 32px;

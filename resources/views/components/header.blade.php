@@ -17,8 +17,11 @@
                 <a href="{{ url('/companies') }}"
                     class="nav-link {{ request()->is('companies*') ? 'active' : '' }}">Companies</a>
                 <div class="account-dropdown">
-                    <a href="#" class="nav-link account-link">
+                    <a href="#" class="nav-link account-link" style="position:relative;" id="account-link">
                         Account <i class="dropdown-icon">▼</i>
+                        @if(isset($headerNotificationCount) && $headerNotificationCount > 0)
+                            <span class="header-notification-badge" id="header-notification-badge" data-count="{{ $headerNotificationCount }}">{{ $headerNotificationCount }}</span>
+                        @endif
                     </a>
                     <div class="dropdown-menu">
                         @auth('agent')
@@ -30,6 +33,12 @@
                         @endauth
                         @auth('seeker')
                             <a href="{{ route('seeker.dashboard') }}" class="dropdown-item">Seeker Dashboard</a>
+                            <a href="{{ route('seeker.notifications.index') }}" class="dropdown-item" id="notifications-link">
+                                Notifications
+                                @if(isset($headerNotificationCount) && $headerNotificationCount > 0)
+                                    <span style="background:#dc3545; color:white; border-radius:10px; padding:2px 6px; font-size:11px; margin-left:8px;">{{ $headerNotificationCount }}</span>
+                                @endif
+                            </a>
                             <form action="{{ route('seeker.logout') }}" method="POST" style="display: inline;">
                                 @csrf
                                 <button type="submit" class="dropdown-item logout-btn">Logout</button>
@@ -37,6 +46,12 @@
                         @endauth
                         @auth('company')
                             <a href="{{ route('company.dashboard') }}" class="dropdown-item">Company Dashboard</a>
+                            <a href="{{ route('company.notifications.index') }}" class="dropdown-item" id="notifications-link">
+                                Notifications
+                                @if(isset($headerNotificationCount) && $headerNotificationCount > 0)
+                                    <span style="background:#dc3545; color:white; border-radius:10px; padding:2px 6px; font-size:11px; margin-left:8px;">{{ $headerNotificationCount }}</span>
+                                @endif
+                            </a>
                             <form action="{{ route('company.logout') }}" method="POST" style="display: inline;">
                                 @csrf
                                 <button type="submit" class="dropdown-item logout-btn">Logout</button>
@@ -130,10 +145,36 @@
         display: flex;
         align-items: center;
         gap: 5px;
+        position: relative;
     }
 
     .dropdown-icon {
         font-size: 10px;
+    }
+
+    .header-notification-badge {
+        position: absolute;
+        top: -4px;
+        right: -8px;
+        background-color: #dc3545;
+        color: white;
+        border-radius: 50%;
+        min-width: 18px;
+        height: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 600;
+        line-height: 1;
+        border: 2px solid #235181;
+        padding: 0 4px;
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+
+    .header-notification-badge:hover {
+        transform: scale(1.1);
     }
 
     .dropdown-menu {
@@ -193,3 +234,97 @@
         }
     }
 </style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const badge = document.getElementById('header-notification-badge');
+        const accountLink = document.getElementById('account-link');
+        
+        // Make badge clickable to go to notifications
+        if (badge) {
+            badge.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                @auth('seeker')
+                    window.location.href = '{{ route("seeker.notifications.index") }}';
+                @endauth
+                @auth('company')
+                    window.location.href = '{{ route("company.notifications.index") }}';
+                @endauth
+            });
+        }
+
+        // Function to update notification count
+        function updateNotificationCount(newCount) {
+            const badge = document.getElementById('header-notification-badge');
+            const notificationsLink = document.getElementById('notifications-link');
+            
+            if (badge) {
+                if (newCount > 0) {
+                    badge.textContent = newCount;
+                    badge.setAttribute('data-count', newCount);
+                    badge.style.display = 'flex';
+                    
+                    // Update count in dropdown menu
+                    if (notificationsLink) {
+                        const span = notificationsLink.querySelector('span');
+                        if (span) {
+                            span.textContent = newCount;
+                        } else {
+                            const newSpan = document.createElement('span');
+                            newSpan.style.cssText = 'background:#dc3545; color:white; border-radius:10px; padding:2px 6px; font-size:11px; margin-left:8px;';
+                            newSpan.textContent = newCount;
+                            notificationsLink.appendChild(newSpan);
+                        }
+                    }
+                } else {
+                    badge.style.display = 'none';
+                    
+                    // Remove count from dropdown menu
+                    if (notificationsLink) {
+                        const span = notificationsLink.querySelector('span');
+                        if (span) {
+                            span.remove();
+                        }
+                    }
+                }
+            }
+        }
+
+        // Listen for notification updates from other pages
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'notificationCount') {
+                updateNotificationCount(parseInt(e.newValue) || 0);
+            }
+        });
+
+        // Check for updates periodically (every 30 seconds)
+        setInterval(function() {
+            @auth('seeker')
+                fetch('{{ route("seeker.notifications.count") }}', {
+                    headers: {'X-Requested-With': 'XMLHttpRequest'}
+                })
+                .then(response => response.json())
+                .then(data => {
+                    updateNotificationCount(data.count);
+                    localStorage.setItem('notificationCount', data.count);
+                })
+                .catch(() => {});
+            @endauth
+            @auth('company')
+                fetch('{{ route("company.notifications.count") }}', {
+                    headers: {'X-Requested-With': 'XMLHttpRequest'}
+                })
+                .then(response => response.json())
+                .then(data => {
+                    updateNotificationCount(data.count);
+                    localStorage.setItem('notificationCount', data.count);
+                })
+                .catch(() => {});
+            @endauth
+        }, 30000);
+
+        // Expose update function globally
+        window.updateNotificationCount = updateNotificationCount;
+    });
+</script>

@@ -10,3 +10,6 @@ Artisan::command('inspire', function () {
 
 // Schedule email sending command to run every minute
 Schedule::command('emails:send-pending')->everyMinute();
+
+// Schedule notification emails to run every 2 minutes (sends top 20)
+Schedule::command('notifications:send-emails')->everyTwoMinutes();

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Job;
+use App\Models\JobApplication;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Carbon;
@@ -116,6 +117,23 @@ class JobListingController extends Controller
 
         $jobs = $query->paginate(12)->withQueryString();
 
+        // Load application statuses for authenticated seeker
+        $applicationStatuses = [];
+        if (Auth::guard('seeker')->check()) {
+            $seeker = Auth::guard('seeker')->user();
+            $jobIds = $jobs->pluck('id');
+            $applications = JobApplication::whereIn('job_id', $jobIds)
+                ->where('seeker_id', $seeker->id)
+                ->get()
+                ->keyBy('job_id');
+            
+            foreach ($jobIds as $jobId) {
+                if ($applications->has($jobId)) {
+                    $applicationStatuses[$jobId] = $applications->get($jobId)->status;
+                }
+            }
+        }
+
         $jobTypes = Job::whereNotNull('job_type')
             ->distinct()
             ->orderBy('job_type')
@@ -136,6 +154,7 @@ class JobListingController extends Controller
             'jobTypes' => $jobTypes,
             'experienceLevels' => $experienceLevels,
             'salaryRange' => $salaryRange,
+            'applicationStatuses' => $applicationStatuses,
         ]);
     }
 

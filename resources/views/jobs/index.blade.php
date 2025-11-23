@@ -156,7 +156,7 @@
                 @else
                     <div class="{{ $view === 'grid' ? 'jobs-result-grid' : 'jobs-result-list' }}">
                         @foreach($jobs as $job)
-                            <article class="job-card {{ $view === 'grid' ? 'job-card-compact' : '' }} {{ $job->featured ? 'job-card-featured' : '' }}">
+                            <article class="job-card {{ $view === 'grid' ? 'job-card-compact' : '' }} {{ $job->featured ? 'job-card-featured' : '' }}" style="position: relative;">
                                 <div class="job-card-header">
                                     <div>
                                         <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
@@ -207,6 +207,34 @@
                                 <div class="job-card-actions">
                                     <a href="{{ route('jobs.show', $job->slug) }}" class="btn btn-light">View details</a>
                                 </div>
+                                @if(isset($applicationStatuses[$job->id]))
+                                    @php
+                                        $status = $applicationStatuses[$job->id];
+                                        $statusConfig = [
+                                            'submitted' => ['label' => 'Applied', 'color' => '#3b82f6', 'bg' => '#dbeafe'],
+                                            'reviewing' => ['label' => 'Under Review', 'color' => '#f59e0b', 'bg' => '#fef3c7'],
+                                            'shortlisted' => ['label' => 'Shortlisted', 'color' => '#10b981', 'bg' => '#d1fae5'],
+                                            'rejected' => ['label' => 'Not Selected', 'color' => '#ef4444', 'bg' => '#fee2e2'],
+                                        ];
+                                        $config = $statusConfig[$status] ?? $statusConfig['submitted'];
+                                    @endphp
+                                    <div class="job-application-status" style="position: absolute; bottom: 20px; right: 20px;">
+                                        <span class="application-status-badge" style="
+                                            background: {{ $config['bg'] }};
+                                            color: {{ $config['color'] }};
+                                            padding: 6px 12px;
+                                            border-radius: 999px;
+                                            font-size: 12px;
+                                            font-weight: 600;
+                                            display: inline-flex;
+                                            align-items: center;
+                                            gap: 6px;
+                                        ">
+                                            <span style="width: 6px; height: 6px; border-radius: 50%; background: {{ $config['color'] }};"></span>
+                                            {{ $config['label'] }}
+                                        </span>
+                                    </div>
+                                @endif
                             </article>
                         @endforeach
                     </div>
@@ -417,6 +445,13 @@
     }
     .job-card-actions {
         margin-top: auto;
+    }
+    .job-card {
+        position: relative;
+    }
+    .job-application-status {
+        z-index: 1;
+        pointer-events: none;
     }
     .jobs-pagination {
         margin-top: 24px;

@@ -44,6 +44,11 @@
             SMTP Settings
         </a>
     </li>
+    <li class="nav-item">
+        <a class="nav-link {{ $activeTab === 'company-attributes' ? 'active' : '' }}" href="{{ route('admin.settings.company-attributes') }}">
+            Company Attributes
+        </a>
+    </li>
 </ul>
 
 @if($activeTab === 'general')
@@ -214,6 +219,8 @@
         @include('admin.settings.tabs.experience-levels')
     @elseif($activeTab === 'smtp')
         @include('admin.settings.tabs.smtp')
+    @elseif($activeTab === 'company-attributes')
+        @include('admin.settings.tabs.company-attributes')
     @endif
 @endif
 

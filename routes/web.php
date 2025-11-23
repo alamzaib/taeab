@@ -25,10 +25,19 @@ use App\Http\Controllers\Agent\ProfileController as AgentProfileController;
 use App\Http\Controllers\Seeker\ResumeController as SeekerResumeController;
 use App\Http\Controllers\CompanyListingController;
 use App\Http\Controllers\PublicSeekerController;
+use App\Http\Controllers\BlogController;
+use App\Models\Company;
 
 // Home page
 Route::get('/', function () {
-    return view('home');
+    $featuredCompanies = Company::with('package')
+        ->whereHas('package', fn($q) => $q->where('name', 'platinum'))
+        ->where('status', 'active')
+        ->orderByDesc('updated_at')
+        ->take(6)
+        ->get();
+
+    return view('home', compact('featuredCompanies'));
 });
 
 Route::get('/jobs', [JobListingController::class, 'index'])->name('jobs.index');
@@ -51,6 +60,8 @@ Route::post('/jobs/{slug}/apply', [JobApplicationController::class, 'store'])->m
 Route::post('/jobs/{slug}/favorite', [JobListingController::class, 'toggleFavorite'])->middleware('auth:seeker')->name('jobs.favorite');
 Route::get('/contact', [App\Http\Controllers\ContactController::class, 'index'])->name('contact');
 Route::post('/contact', [App\Http\Controllers\ContactController::class, 'store'])->name('contact.store');
+Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
+Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 Route::get('/login', fn () => redirect()->route('seeker.login'))->name('login');
 
 Route::fallback(function () {
@@ -100,10 +111,13 @@ Route::prefix('seeker')->group(function () {
             Route::post('/profile', [SeekerResumeController::class, 'updateProfile'])->name('profile');
             Route::get('/preview', [SeekerResumeController::class, 'preview'])->name('preview');
             Route::post('/educations', [SeekerResumeController::class, 'storeEducation'])->name('educations.store');
+            Route::put('/educations/{education}', [SeekerResumeController::class, 'updateEducation'])->name('educations.update');
             Route::delete('/educations/{education}', [SeekerResumeController::class, 'destroyEducation'])->name('educations.destroy');
             Route::post('/experiences', [SeekerResumeController::class, 'storeExperience'])->name('experiences.store');
+            Route::put('/experiences/{experience}', [SeekerResumeController::class, 'updateExperience'])->name('experiences.update');
             Route::delete('/experiences/{experience}', [SeekerResumeController::class, 'destroyExperience'])->name('experiences.destroy');
             Route::post('/references', [SeekerResumeController::class, 'storeReference'])->name('references.store');
+            Route::put('/references/{reference}', [SeekerResumeController::class, 'updateReference'])->name('references.update');
             Route::delete('/references/{reference}', [SeekerResumeController::class, 'destroyReference'])->name('references.destroy');
             Route::post('/hobbies', [SeekerResumeController::class, 'storeHobby'])->name('hobbies.store');
             Route::delete('/hobbies/{hobby}', [SeekerResumeController::class, 'destroyHobby'])->name('hobbies.destroy');
@@ -111,6 +125,12 @@ Route::prefix('seeker')->group(function () {
         Route::get('/applications', [SeekerApplicationController::class, 'index'])->name('seeker.applications.index');
         Route::get('/applications/{application}', [SeekerApplicationController::class, 'show'])->name('seeker.applications.show');
         Route::post('/applications/{application}/messages', [SeekerApplicationController::class, 'storeMessage'])->name('seeker.applications.messages.store');
+        Route::prefix('notifications')->name('seeker.notifications.')->group(function () {
+            Route::get('/', [App\Http\Controllers\Seeker\NotificationController::class, 'index'])->name('index');
+            Route::post('/{notification}/read', [App\Http\Controllers\Seeker\NotificationController::class, 'markAsRead'])->name('read');
+            Route::post('/read-all', [App\Http\Controllers\Seeker\NotificationController::class, 'markAllAsRead'])->name('read-all');
+            Route::get('/count', [App\Http\Controllers\Seeker\NotificationController::class, 'count'])->name('count');
+        });
         Route::get('/documents', [DocumentController::class, 'index'])->name('seeker.documents.index');
         Route::post('/documents', [DocumentController::class, 'store'])->name('seeker.documents.store');
         Route::delete('/documents/{document}', [DocumentController::class, 'destroy'])->name('seeker.documents.destroy');
@@ -133,6 +153,12 @@ Route::prefix('company')->group(function () {
         Route::get('/applications', [CompanyApplicationController::class, 'index'])->name('company.applications.index');
         Route::get('/applications/{application}', [CompanyApplicationController::class, 'show'])->name('company.applications.show');
         Route::post('/applications/{application}/messages', [CompanyApplicationController::class, 'storeMessage'])->name('company.applications.messages.store');
+        Route::prefix('notifications')->name('company.notifications.')->group(function () {
+            Route::get('/', [App\Http\Controllers\Company\NotificationController::class, 'index'])->name('index');
+            Route::post('/{notification}/read', [App\Http\Controllers\Company\NotificationController::class, 'markAsRead'])->name('read');
+            Route::post('/read-all', [App\Http\Controllers\Company\NotificationController::class, 'markAllAsRead'])->name('read-all');
+            Route::get('/count', [App\Http\Controllers\Company\NotificationController::class, 'count'])->name('count');
+        });
         Route::resource('jobs', CompanyJobController::class)->except(['show'])->names([
             'index' => 'company.jobs.index',
             'create' => 'company.jobs.create',
@@ -189,6 +215,16 @@ Route::prefix('admin')->group(function () {
         Route::delete('/settings/experience-levels/{experienceLevel}', [App\Http\Controllers\Admin\ExperienceLevelController::class, 'destroy'])->name('admin.settings.experience-levels.destroy');
         Route::get('/settings/smtp', [App\Http\Controllers\Admin\SmtpSettingsController::class, 'index'])->name('admin.settings.smtp');
         Route::post('/settings/smtp', [App\Http\Controllers\Admin\SmtpSettingsController::class, 'update'])->name('admin.settings.smtp.update');
+        Route::get('/settings/company-attributes', [App\Http\Controllers\Admin\CompanySizeController::class, 'index'])->name('admin.settings.company-attributes');
+        Route::post('/settings/company-sizes', [App\Http\Controllers\Admin\CompanySizeController::class, 'store'])->name('admin.settings.company-sizes.store');
+        Route::put('/settings/company-sizes/{companySize}', [App\Http\Controllers\Admin\CompanySizeController::class, 'update'])->name('admin.settings.company-sizes.update');
+        Route::delete('/settings/company-sizes/{companySize}', [App\Http\Controllers\Admin\CompanySizeController::class, 'destroy'])->name('admin.settings.company-sizes.destroy');
+        Route::post('/settings/industries', [App\Http\Controllers\Admin\IndustryController::class, 'store'])->name('admin.settings.industries.store');
+        Route::put('/settings/industries/{industry}', [App\Http\Controllers\Admin\IndustryController::class, 'update'])->name('admin.settings.industries.update');
+        Route::delete('/settings/industries/{industry}', [App\Http\Controllers\Admin\IndustryController::class, 'destroy'])->name('admin.settings.industries.destroy');
+        Route::post('/settings/organization-types', [App\Http\Controllers\Admin\OrganizationTypeController::class, 'store'])->name('admin.settings.organization-types.store');
+        Route::put('/settings/organization-types/{organizationType}', [App\Http\Controllers\Admin\OrganizationTypeController::class, 'update'])->name('admin.settings.organization-types.update');
+        Route::delete('/settings/organization-types/{organizationType}', [App\Http\Controllers\Admin\OrganizationTypeController::class, 'destroy'])->name('admin.settings.organization-types.destroy');
         
         // API route for cities (admin)
         Route::get('/api/cities', function(\Illuminate\Http\Request $request) {
@@ -224,6 +260,14 @@ Route::prefix('admin')->group(function () {
         Route::get('/packages/requests', [App\Http\Controllers\Admin\PackageController::class, 'requests'])->name('admin.packages.requests');
         Route::post('/packages/requests/{packageRequest}/approve', [App\Http\Controllers\Admin\PackageController::class, 'approve'])->name('admin.packages.approve');
         Route::post('/packages/requests/{packageRequest}/reject', [App\Http\Controllers\Admin\PackageController::class, 'reject'])->name('admin.packages.reject');
+        Route::resource('blog-posts', App\Http\Controllers\Admin\BlogPostController::class)->except(['show'])->names([
+            'index' => 'admin.blog-posts.index',
+            'create' => 'admin.blog-posts.create',
+            'store' => 'admin.blog-posts.store',
+            'edit' => 'admin.blog-posts.edit',
+            'update' => 'admin.blog-posts.update',
+            'destroy' => 'admin.blog-posts.destroy',
+        ]);
 
         // User Management Routes
         Route::prefix('users')->name('admin.users.')->group(function () {

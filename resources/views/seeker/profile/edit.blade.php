@@ -68,7 +68,8 @@
                 </div>
                 <div class="form-group">
                     <label for="email">Email Address</label>
-                    <input type="email" id="email" name="email" class="form-control" value="{{ old('email', $seeker->email) }}" required>
+                    <input type="email" id="email" class="form-control" value="{{ $seeker->email }}" readonly style="background-color: #f5f5f5; cursor: not-allowed;">
+                    <small style="color: #6b7280; font-size: 12px;">Email address cannot be changed</small>
                 </div>
             </div>
 

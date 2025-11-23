@@ -162,6 +162,14 @@
                         </li>
 
                         <li class="nav-item">
+                            <a href="{{ route('admin.blog-posts.index') }}"
+                                class="nav-link {{ request()->is('admin/blog-posts*') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-newspaper"></i>
+                                <p>Blog Posts</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
                             <a href="{{ route('admin.settings.index') }}"
                                 class="nav-link {{ request()->is('admin/settings*') ? 'active' : '' }}">
                                 <i class="nav-icon fas fa-cog"></i>

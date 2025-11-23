@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\Job;
 use App\Models\JobApplication;
 use App\Models\JobApplicationMessage;
+use App\Models\ApplicationNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class ApplicationController extends Controller
 {
@@ -74,13 +76,37 @@ class ApplicationController extends Controller
             'message' => ['required', 'string', 'max:3000'],
         ]);
 
-        JobApplicationMessage::create([
+        // Load job relationship to ensure it's available
+        $application->load('job');
+
+        $message = JobApplicationMessage::create([
             'job_application_id' => $application->id,
             'sender_type' => 'company',
             'company_id' => $company->id,
             'seeker_id' => $application->seeker_id,
             'message' => $validated['message'],
         ]);
+
+        // Create notification for seeker
+        try {
+            ApplicationNotification::create([
+                'recipient_type' => 'seeker',
+                'recipient_id' => $application->seeker_id,
+                'type' => 'message',
+                'title' => 'New Message from ' . $company->company_name,
+                'message' => 'You have a new message regarding your application for: ' . $application->job->title,
+                'job_application_id' => $application->id,
+                'job_id' => $application->job_id,
+                'email_sent' => false, // Explicitly set to false for email sending
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Failed to create notification for message', [
+                'application_id' => $application->id,
+                'company_id' => $company->id,
+                'seeker_id' => $application->seeker_id,
+                'error' => $e->getMessage(),
+            ]);
+        }
 
         if ($request->wantsJson() || $request->ajax()) {
             return response()->json([

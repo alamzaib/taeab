@@ -32,6 +32,10 @@
             <div class="form-group">
                 <label><input type="checkbox" name="set_default" value="1"> Set as default resume</label>
             </div>
+            <div class="form-group">
+                <label><input type="checkbox" name="parse_resume" value="1" checked> Parse resume and auto-fill profile</label>
+                <small style="display:block; color:#6b7280; margin-top:4px;">Automatically extract and update your Education, Job History, References, Skills, and Profile information from the resume.</small>
+            </div>
             <button class="btn-primary" type="submit">Upload Resume</button>
         </form>
     </div>

@@ -44,8 +44,12 @@
     @endif
 
     @if (!empty($settings['custom_javascript']))
-        {!! $settings['custom_javascript'] !!}
+{!! $settings['custom_javascript'] !!}
     @endif
+    <!-- Google Font: Roboto -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -54,7 +58,7 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Roboto', sans-serif;
             background-color: #ffffff;
             min-height: 100vh;
             display: flex;

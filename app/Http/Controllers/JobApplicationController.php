@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Job;
 use App\Models\JobApplication;
 use App\Models\JobDocument;
+use App\Models\ApplicationNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class JobApplicationController extends Controller
 {
@@ -53,7 +55,7 @@ class JobApplicationController extends Controller
 
         $coverLetterDoc = $this->resolveDocument($seeker, $request->input('cover_letter_document_id'), 'cover_letter', allowNull: true);
 
-        JobApplication::create([
+        $application = JobApplication::create([
             'job_id' => $job->id,
             'seeker_id' => $seeker->id,
             'resume_document_id' => $resume->id,
@@ -61,6 +63,27 @@ class JobApplicationController extends Controller
             'cover_letter' => $request->input('cover_letter'),
             'status' => 'submitted',
         ]);
+
+        // Create notification for company
+        try {
+            ApplicationNotification::create([
+                'recipient_type' => 'company',
+                'recipient_id' => $job->company_id,
+                'type' => 'application',
+                'title' => 'New Job Application',
+                'message' => $seeker->name . ' has applied for the position: ' . $job->title,
+                'job_application_id' => $application->id,
+                'job_id' => $job->id,
+                'email_sent' => false, // Explicitly set to false for email sending
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Failed to create notification for application', [
+                'application_id' => $application->id,
+                'seeker_id' => $seeker->id,
+                'company_id' => $job->company_id,
+                'error' => $e->getMessage(),
+            ]);
+        }
 
         return redirect()->route('jobs.show', $job->slug)->with('success', 'Application submitted successfully!');
     }

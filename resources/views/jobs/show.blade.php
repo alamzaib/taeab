@@ -74,7 +74,7 @@
                         <span class="badge badge-success">Application submitted</span>
                     @else
                         <a href="{{ route('jobs.apply.form', $job->slug) }}" class="btn-primary btn-apply-large">Apply now</a>
-                        <small>You'll review documents before submitting.</small>
+                        <br><small>You'll review documents before submitting.</small>
                     @endif
                 @else
                     <button id="apply-btn" class="btn-primary btn-apply-large">Apply now</button>

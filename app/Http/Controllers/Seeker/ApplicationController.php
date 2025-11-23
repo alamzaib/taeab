@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Seeker;
 use App\Http\Controllers\Controller;
 use App\Models\JobApplication;
 use App\Models\JobApplicationMessage;
+use App\Models\ApplicationNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class ApplicationController extends Controller
 {
@@ -62,13 +64,37 @@ class ApplicationController extends Controller
             'message' => ['required', 'string', 'max:3000'],
         ]);
 
-        JobApplicationMessage::create([
+        // Load job relationship to ensure it's available
+        $application->load('job');
+
+        $message = JobApplicationMessage::create([
             'job_application_id' => $application->id,
             'sender_type' => 'seeker',
             'seeker_id' => $seeker->id,
             'company_id' => $application->job->company_id,
             'message' => $validated['message'],
         ]);
+
+        // Create notification for company
+        try {
+            ApplicationNotification::create([
+                'recipient_type' => 'company',
+                'recipient_id' => $application->job->company_id,
+                'type' => 'message',
+                'title' => 'New Message from ' . $seeker->name,
+                'message' => 'You have a new message regarding the application for: ' . $application->job->title,
+                'job_application_id' => $application->id,
+                'job_id' => $application->job_id,
+                'email_sent' => false, // Explicitly set to false for email sending
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Failed to create notification for message', [
+                'application_id' => $application->id,
+                'seeker_id' => $seeker->id,
+                'company_id' => $application->job->company_id,
+                'error' => $e->getMessage(),
+            ]);
+        }
 
         if ($request->wantsJson() || $request->ajax()) {
             return response()->json([

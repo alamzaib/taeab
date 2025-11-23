@@ -68,6 +68,21 @@ class Company extends Authenticatable
         return $this->hasMany(CompanyPackageRequest::class);
     }
 
+    public function notifications(): HasMany
+    {
+        return $this->hasMany(ApplicationNotification::class, 'recipient_id')
+            ->where('recipient_type', 'company')
+            ->orderByDesc('created_at');
+    }
+
+    public function unreadNotifications(): HasMany
+    {
+        return $this->hasMany(ApplicationNotification::class, 'recipient_id')
+            ->where('recipient_type', 'company')
+            ->where('is_read', false)
+            ->orderByDesc('created_at');
+    }
+
     public function getLogoUrlAttribute(): ?string
     {
         $path = $this->normalizeStoragePath($this->logo_path);

@@ -52,6 +52,24 @@ class ResumeController extends Controller
         return back()->with('success', 'Education added.');
     }
 
+    public function updateEducation(Request $request, SeekerEducation $education): RedirectResponse
+    {
+        $this->authorizeEntry($education);
+
+        $data = $request->validate([
+            'institution' => ['required', 'string', 'max:255'],
+            'degree' => ['nullable', 'string', 'max:255'],
+            'field_of_study' => ['nullable', 'string', 'max:255'],
+            'start_date' => ['nullable', 'date'],
+            'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
+            'description' => ['nullable', 'string'],
+        ]);
+
+        $education->update($data);
+
+        return back()->with('success', 'Education updated.');
+    }
+
     public function destroyEducation(SeekerEducation $education): RedirectResponse
     {
         $this->authorizeEntry($education);
@@ -80,6 +98,25 @@ class ResumeController extends Controller
         return back()->with('success', 'Experience added.');
     }
 
+    public function updateExperience(Request $request, SeekerExperience $experience): RedirectResponse
+    {
+        $this->authorizeEntry($experience);
+
+        $data = $request->validate([
+            'company_name' => ['required', 'string', 'max:255'],
+            'role_title' => ['required', 'string', 'max:255'],
+            'start_date' => ['nullable', 'date'],
+            'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
+            'is_current' => ['sometimes', 'boolean'],
+            'achievements' => ['nullable', 'string'],
+        ]);
+
+        $data['is_current'] = $request->boolean('is_current');
+        $experience->update($data);
+
+        return back()->with('success', 'Experience updated.');
+    }
+
     public function destroyExperience(SeekerExperience $experience): RedirectResponse
     {
         $this->authorizeEntry($experience);
@@ -104,6 +141,24 @@ class ResumeController extends Controller
         $seeker->references()->create($data);
 
         return back()->with('success', 'Reference added.');
+    }
+
+    public function updateReference(Request $request, SeekerReference $reference): RedirectResponse
+    {
+        $this->authorizeEntry($reference);
+
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'company' => ['nullable', 'string', 'max:255'],
+            'title' => ['nullable', 'string', 'max:255'],
+            'email' => ['nullable', 'email', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:50'],
+            'notes' => ['nullable', 'string'],
+        ]);
+
+        $reference->update($data);
+
+        return back()->with('success', 'Reference updated.');
     }
 
     public function destroyReference(SeekerReference $reference): RedirectResponse

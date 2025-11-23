@@ -56,7 +56,7 @@
                                     stroke-width="2">
                                     <polyline points="15 18 9 12 15 6"></polyline>
                                 </svg>
-                                Back to listings
+                                All Companies
                             </a>
                         </div>
                     </div>

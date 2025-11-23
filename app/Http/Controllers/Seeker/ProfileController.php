@@ -22,7 +22,6 @@ class ProfileController extends Controller
 
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', Rule::unique('seekers')->ignore($seeker->id)],
             'phone' => ['required', 'string', 'max:20'],
             'whatsapp_number' => ['nullable', 'string', 'max:20'],
             'about' => ['nullable', 'string'],
@@ -40,22 +39,25 @@ class ProfileController extends Controller
             'password' => ['nullable', 'string', 'min:8', 'confirmed'],
         ]);
 
-        $seeker->fill([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'phone' => $validated['phone'],
-            'whatsapp_number' => $validated['whatsapp_number'] ?? $seeker->whatsapp_number,
-            'about' => $validated['about'] ?? $seeker->about,
-            'skills' => isset($validated['skills']) ? implode(',', (array) $validated['skills']) : $seeker->skills,
-            'current_salary' => $validated['current_salary'] ?? $seeker->current_salary,
-            'target_salary' => $validated['target_salary'] ?? $seeker->target_salary,
-            'current_company' => $validated['current_company'] ?? $seeker->current_company,
-            'residence_country' => $validated['residence_country'] ?? $seeker->residence_country,
-            'nationality' => $validated['nationality'] ?? $seeker->nationality,
-            'date_of_birth' => $validated['date_of_birth'] ?? $seeker->date_of_birth,
-            'address' => $validated['address'] ?? $seeker->address,
-            'linkedin_url' => $validated['linkedin_url'] ?? $seeker->linkedin_url,
-        ]);
+        // Process skills - it comes as a comma-separated string from the hidden input
+        $skills = isset($validated['skills']) ? trim($validated['skills']) : null;
+        $skills = !empty($skills) ? $skills : null;
+
+        // Update all fields - use validated values, or null if empty
+        // Note: Email cannot be changed
+        $seeker->name = $validated['name'];
+        $seeker->phone = $validated['phone'];
+        $seeker->whatsapp_number = !empty($validated['whatsapp_number']) ? $validated['whatsapp_number'] : null;
+        $seeker->about = !empty($validated['about']) ? $validated['about'] : null;
+        $seeker->skills = $skills;
+        $seeker->current_salary = !empty($validated['current_salary']) ? $validated['current_salary'] : null;
+        $seeker->target_salary = !empty($validated['target_salary']) ? $validated['target_salary'] : null;
+        $seeker->current_company = !empty($validated['current_company']) ? $validated['current_company'] : null;
+        $seeker->residence_country = !empty($validated['residence_country']) ? $validated['residence_country'] : null;
+        $seeker->nationality = !empty($validated['nationality']) ? $validated['nationality'] : null;
+        $seeker->date_of_birth = !empty($validated['date_of_birth']) ? $validated['date_of_birth'] : null;
+        $seeker->address = !empty($validated['address']) ? $validated['address'] : null;
+        $seeker->linkedin_url = !empty($validated['linkedin_url']) ? $validated['linkedin_url'] : null;
 
         if ($request->hasFile('profile_photo')) {
             if ($seeker->profile_photo_path) {

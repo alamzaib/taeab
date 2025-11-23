@@ -115,6 +115,21 @@ class Seeker extends Authenticatable
         return $this->hasMany(SeekerHobby::class);
     }
 
+    public function notifications(): HasMany
+    {
+        return $this->hasMany(ApplicationNotification::class, 'recipient_id')
+            ->where('recipient_type', 'seeker')
+            ->orderByDesc('created_at');
+    }
+
+    public function unreadNotifications(): HasMany
+    {
+        return $this->hasMany(ApplicationNotification::class, 'recipient_id')
+            ->where('recipient_type', 'seeker')
+            ->where('is_read', false)
+            ->orderByDesc('created_at');
+    }
+
     public function getProfilePhotoUrlAttribute(): string
     {
         $path = $this->normalizeStoragePath($this->profile_photo_path);

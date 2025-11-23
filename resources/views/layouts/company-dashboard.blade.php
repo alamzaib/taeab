@@ -50,6 +50,12 @@
                     <a href="{{ route('company.dashboard', ['tab' => 'messages']) }}" class="company-nav-item {{ $currentTab === 'messages' ? 'active' : '' }}">
                         <span>💬</span> Messages
                     </a>
+                    <a href="{{ route('company.notifications.index') }}" class="company-nav-item {{ $currentTab === 'notifications' ? 'active' : '' }}" style="position:relative;">
+                        <span>🔔</span> Notifications
+                        @if(isset($unreadNotificationCount) && $unreadNotificationCount > 0)
+                            <span class="notification-badge">{{ $unreadNotificationCount }}</span>
+                        @endif
+                    </a>
                 </nav>
             </div>
             <div style="flex:1; padding:32px; overflow-y:auto;">
@@ -82,6 +88,24 @@
 }
 .company-nav-item span {
     font-size:18px;
+}
+.company-nav-item {
+    position:relative;
+}
+.notification-badge {
+    position:absolute;
+    top:8px;
+    right:16px;
+    background:#dc3545;
+    color:white;
+    border-radius:50%;
+    width:20px;
+    height:20px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:11px;
+    font-weight:600;
 }
 .company-dashboard a {
     color: #235181;

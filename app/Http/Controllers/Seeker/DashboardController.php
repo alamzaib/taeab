@@ -35,7 +35,9 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
-        return view('seeker.dashboard', compact('seeker', 'stats', 'favorites', 'recentApplications'));
+        $unreadNotificationCount = $seeker->unreadNotifications()->count();
+
+        return view('seeker.dashboard', compact('seeker', 'stats', 'favorites', 'recentApplications', 'unreadNotificationCount'));
     }
 }
 
