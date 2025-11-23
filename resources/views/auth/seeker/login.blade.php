@@ -30,9 +30,10 @@
                 </div>
             @endif
 
-            <form method="POST" action="{{ route('seeker.login') }}">
+            <form method="POST" action="{{ route('seeker.login') }}" id="seekerLoginForm">
                 @csrf
                 <input type="hidden" name="redirect" value="{{ request('redirect') }}">
+                <input type="hidden" name="g-recaptcha-response" id="g-recaptcha-response">
                 <div class="auth-input">
                     <label for="email">Email Address</label>
                     <input type="email" id="email" name="email" value="{{ old('email') }}" required autofocus>
@@ -49,6 +50,24 @@
                 </div>
                 <button type="submit" class="btn-primary" style="width:100%; margin-top:20px;">Sign In</button>
             </form>
+            
+            @push('scripts')
+            <script>
+            document.getElementById('seekerLoginForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const form = this;
+                
+                if (window.recaptchaSiteKey) {
+                    executeRecaptcha('login').then(function(token) {
+                        document.getElementById('g-recaptcha-response').value = token;
+                        form.submit();
+                    });
+                } else {
+                    form.submit();
+                }
+            });
+            </script>
+            @endpush
         </div>
         <div class="auth-side">
             <h3>New to Job Portal?</h3>

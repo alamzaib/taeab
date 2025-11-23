@@ -29,11 +29,16 @@
         <meta name="keywords" content="{{ $metaKeywords }}">
     @endif
 
-    @if (!empty($settings['favicon']))
-        <link rel="icon" type="image/png" href="{{ Storage::url($settings['favicon']) }}">
-    @else
-        <link rel="icon" type="image/svg+xml" href="{{ asset('images/logo.svg') }}">
-    @endif
+    @php
+        $faviconUrl = asset('images/logo.svg'); // Default fallback
+        if (!empty($settings['favicon'])) {
+            $generatedFaviconUrl = storage_url($settings['favicon']);
+            if (!empty($generatedFaviconUrl)) {
+                $faviconUrl = $generatedFaviconUrl;
+            }
+        }
+    @endphp
+    <link rel="icon" type="image/png" href="{{ $faviconUrl }}">
 
     @if (!empty($settings['google_analytics_code']))
         {!! $settings['google_analytics_code'] !!}
@@ -133,12 +138,36 @@
             padding: 20px;
         }
 
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px;
+            }
+        }
+
         .card {
             background: white;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             padding: 20px;
             margin: 0;
+        }
+
+        @media (max-width: 768px) {
+            .card {
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .card {
+                padding: 12px;
+            }
         }
 
         table {
@@ -156,6 +185,28 @@
             text-align: left;
             color: #235181;
             font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            table {
+                display: block;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            table th,
+            table td {
+                padding: 8px;
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            table th,
+            table td {
+                padding: 6px;
+                font-size: 12px;
+            }
         }
 
         .pagination-wrapper {
@@ -419,6 +470,72 @@
             box-shadow: 0 0 0 2px rgba(35, 81, 129, 0.2);
         }
 
+        @media (max-width: 768px) {
+            .form-group {
+                margin-bottom: 15px;
+            }
+
+            .form-control {
+                padding: 12px;
+                font-size: 16px; /* Prevents zoom on iOS */
+            }
+
+            .btn-primary,
+            .btn {
+                width: 100%;
+                padding: 12px;
+                font-size: 16px;
+            }
+
+            .auth-card {
+                grid-template-columns: 1fr;
+            }
+
+            .auth-panel {
+                padding: 30px 20px;
+            }
+
+            .auth-side {
+                padding: 30px 20px;
+            }
+
+            .auth-panel h2 {
+                font-size: 24px;
+            }
+
+            .auth-side h3 {
+                font-size: 22px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .form-control {
+                padding: 10px;
+            }
+
+            .btn-primary,
+            .btn {
+                padding: 10px;
+                font-size: 14px;
+            }
+
+            .auth-panel {
+                padding: 20px 15px;
+            }
+
+            .auth-side {
+                padding: 20px 15px;
+            }
+
+            .auth-panel h2 {
+                font-size: 20px;
+            }
+
+            .auth-side h3 {
+                font-size: 18px;
+            }
+        }
+
         .alert {
             padding: 15px;
             border-radius: 5px;
@@ -459,6 +576,54 @@
         }
     </style>
     @stack('styles')
+    
+    @php
+        $recaptchaService = app(\App\Services\RecaptchaService::class);
+        $recaptchaSiteKey = $recaptchaService->getSiteKey();
+    @endphp
+    
+    @if($recaptchaSiteKey)
+    <!-- Google reCAPTCHA v3 -->
+    <script src="https://www.google.com/recaptcha/api.js?render={{ $recaptchaSiteKey }}&badge=bottomleft"></script>
+    <script>
+        window.recaptchaSiteKey = '{{ $recaptchaSiteKey }}';
+        
+        function executeRecaptcha(action) {
+            return new Promise(function(resolve, reject) {
+                if (!window.recaptchaSiteKey) {
+                    resolve('');
+                    return;
+                }
+                
+                grecaptcha.ready(function() {
+                    grecaptcha.execute(window.recaptchaSiteKey, {action: action})
+                        .then(function(token) {
+                            resolve(token);
+                        })
+                        .catch(function(error) {
+                            console.error('reCAPTCHA error:', error);
+                            resolve('');
+                        });
+                });
+            });
+        }
+    </script>
+    <style>
+        /* Move reCAPTCHA badge to bottom left */
+        .grecaptcha-badge {
+            left: 20px !important;
+            right: auto !important;
+            bottom: 20px !important;
+            z-index: 998 !important;
+            position: fixed !important;
+        }
+        
+        /* Ensure back to top button doesn't overlap */
+        #backToTopBtn {
+            z-index: 999 !important;
+        }
+    </style>
+    @endif
 </head>
 
 <body>
@@ -473,7 +638,28 @@
     @stack('scripts')
 </body>
 <button id="backToTopBtn"
-    style="position: fixed; bottom: 30px; right: 30px; display: none; background-color: #235181; color: white; border: none; border-radius: 50%; width: 50px; height: 50px; font-size: 20px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">↑</button>
+    style="position: fixed; bottom: 30px; right: 30px; display: none; background-color: #235181; color: white; border: none; border-radius: 50%; width: 50px; height: 50px; font-size: 20px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 999;">↑</button>
+<style>
+    @media (max-width: 768px) {
+        #backToTopBtn {
+            bottom: 20px;
+            right: 20px;
+            width: 45px;
+            height: 45px;
+            font-size: 18px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        #backToTopBtn {
+            bottom: 15px;
+            right: 15px;
+            width: 40px;
+            height: 40px;
+            font-size: 16px;
+        }
+    }
+</style>
 <script>
     const backToTopBtn = document.getElementById('backToTopBtn');
     window.addEventListener('scroll', () => {

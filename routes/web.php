@@ -28,6 +28,85 @@ use App\Http\Controllers\PublicSeekerController;
 use App\Http\Controllers\BlogController;
 use App\Models\Company;
 
+// Serve storage files (fallback if symlink doesn't work on Windows)
+// This route must be placed early to catch storage requests
+// Exclude from CSRF and other middleware that might block it
+Route::get('/storage/{path}', function ($path) {
+    // Normalize the path - remove any leading/trailing slashes
+    $path = trim($path, '/');
+    
+    // Construct the full file path
+    // storage_path() already returns the path to the 'storage' directory
+    $filePath = storage_path('app/public/' . $path);
+    
+    // Log for debugging
+    \Log::info('Storage route accessed', [
+        'requested_path' => $path,
+        'file_path' => $filePath,
+        'file_exists' => file_exists($filePath),
+        'is_file' => is_file($filePath),
+        'is_readable' => is_readable($filePath),
+        'real_path' => realpath($filePath)
+    ]);
+    
+    // Check if file exists and is readable
+    if (!file_exists($filePath)) {
+        \Log::warning('Storage file not found', [
+            'requested_path' => $path,
+            'file_path' => $filePath,
+            'directory_exists' => is_dir(dirname($filePath))
+        ]);
+        abort(404, 'File not found');
+    }
+    
+    if (!is_file($filePath)) {
+        \Log::warning('Storage path is not a file', [
+            'requested_path' => $path,
+            'file_path' => $filePath
+        ]);
+        abort(404, 'Not a file');
+    }
+    
+    // Try to read the file content directly instead of checking is_readable()
+    // is_readable() can be unreliable on Windows/XAMPP
+    $fileContent = @file_get_contents($filePath);
+    if ($fileContent === false) {
+        \Log::error('Storage file could not be read', [
+            'requested_path' => $path,
+            'file_path' => $filePath,
+            'error' => error_get_last()['message'] ?? 'Unknown error'
+        ]);
+        abort(403, 'File could not be read');
+    }
+    
+    // Determine MIME type
+    $mimeType = @mime_content_type($filePath);
+    if (!$mimeType) {
+        $extension = pathinfo($filePath, PATHINFO_EXTENSION);
+        $mimeTypes = [
+            'png' => 'image/png',
+            'jpg' => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'gif' => 'image/gif',
+            'svg' => 'image/svg+xml',
+            'ico' => 'image/x-icon',
+        ];
+        $mimeType = $mimeTypes[strtolower($extension)] ?? 'application/octet-stream';
+    }
+    
+    \Log::info('Serving storage file', [
+        'path' => $path,
+        'mime_type' => $mimeType,
+        'file_size' => strlen($fileContent)
+    ]);
+    
+    return response($fileContent, 200)
+        ->header('Content-Type', $mimeType)
+        ->header('Content-Length', strlen($fileContent))
+        ->header('Cache-Control', 'public, max-age=31536000')
+        ->header('Content-Disposition', 'inline; filename="' . basename($filePath) . '"');
+})->where('path', '.+')->name('storage.serve');
+
 // Home page
 Route::get('/', function () {
     $featuredCompanies = Company::with('package')
@@ -57,6 +136,8 @@ Route::get('/talent/{code}', [PublicSeekerController::class, 'show'])->name('see
 Route::get('/jobs/{slug}', [JobListingController::class, 'show'])->name('jobs.show');
 Route::get('/jobs/{slug}/apply', [JobApplicationController::class, 'create'])->middleware('auth:seeker')->name('jobs.apply.form');
 Route::post('/jobs/{slug}/apply', [JobApplicationController::class, 'store'])->middleware('auth:seeker')->name('jobs.apply');
+Route::post('/jobs/{slug}/apply/linkedin', [App\Http\Controllers\LinkedInJobApplicationController::class, 'redirect'])->middleware('auth:seeker')->name('jobs.apply.linkedin');
+Route::get('/jobs/apply/linkedin/callback', [App\Http\Controllers\LinkedInJobApplicationController::class, 'callback'])->name('jobs.apply.linkedin.callback');
 Route::post('/jobs/{slug}/favorite', [JobListingController::class, 'toggleFavorite'])->middleware('auth:seeker')->name('jobs.favorite');
 Route::get('/contact', [App\Http\Controllers\ContactController::class, 'index'])->name('contact');
 Route::post('/contact', [App\Http\Controllers\ContactController::class, 'store'])->name('contact.store');
@@ -215,6 +296,10 @@ Route::prefix('admin')->group(function () {
         Route::delete('/settings/experience-levels/{experienceLevel}', [App\Http\Controllers\Admin\ExperienceLevelController::class, 'destroy'])->name('admin.settings.experience-levels.destroy');
         Route::get('/settings/smtp', [App\Http\Controllers\Admin\SmtpSettingsController::class, 'index'])->name('admin.settings.smtp');
         Route::post('/settings/smtp', [App\Http\Controllers\Admin\SmtpSettingsController::class, 'update'])->name('admin.settings.smtp.update');
+        Route::get('/settings/recaptcha', [App\Http\Controllers\Admin\RecaptchaSettingsController::class, 'index'])->name('admin.settings.recaptcha');
+        Route::post('/settings/recaptcha', [App\Http\Controllers\Admin\RecaptchaSettingsController::class, 'update'])->name('admin.settings.recaptcha.update');
+        Route::get('/settings/storage', [App\Http\Controllers\Admin\StorageSettingsController::class, 'index'])->name('admin.settings.storage');
+        Route::post('/settings/storage', [App\Http\Controllers\Admin\StorageSettingsController::class, 'update'])->name('admin.settings.storage.update');
         Route::get('/settings/company-attributes', [App\Http\Controllers\Admin\CompanySizeController::class, 'index'])->name('admin.settings.company-attributes');
         Route::post('/settings/company-sizes', [App\Http\Controllers\Admin\CompanySizeController::class, 'store'])->name('admin.settings.company-sizes.store');
         Route::put('/settings/company-sizes/{companySize}', [App\Http\Controllers\Admin\CompanySizeController::class, 'update'])->name('admin.settings.company-sizes.update');
@@ -295,5 +380,27 @@ Route::prefix('admin')->group(function () {
             Route::put('/companies/{company}', [App\Http\Controllers\Admin\UserController::class, 'companiesUpdate'])->name('companies.update');
             Route::delete('/companies/{company}', [App\Http\Controllers\Admin\UserController::class, 'companiesDestroy'])->name('companies.destroy');
         });
+
+        // Payment Links
+        Route::resource('payment-links', App\Http\Controllers\Admin\PaymentLinkController::class)->except(['edit', 'update', 'destroy'])->names([
+            'index' => 'admin.payment-links.index',
+            'create' => 'admin.payment-links.create',
+            'store' => 'admin.payment-links.store',
+            'show' => 'admin.payment-links.show',
+        ]);
+        Route::get('/payment-links/{paymentLink}/invoice', [App\Http\Controllers\Admin\PaymentLinkController::class, 'generateInvoice'])->name('admin.payment-links.invoice');
+        Route::get('/payment-links/recipients', [App\Http\Controllers\Admin\PaymentLinkController::class, 'getRecipients'])->name('admin.payment-links.recipients');
     });
 });
+
+// Stripe Webhook (no auth required)
+Route::post('/stripe/webhook', [App\Http\Controllers\StripeWebhookController::class, 'handle'])->name('stripe.webhook');
+
+// Payment Success/Cancel Pages
+Route::get('/payment/success', function() {
+    return view('payment.success');
+})->name('payment.success');
+
+Route::get('/payment/cancel', function() {
+    return view('payment.cancel');
+})->name('payment.cancel');

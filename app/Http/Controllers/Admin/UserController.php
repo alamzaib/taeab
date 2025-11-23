@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\Agent;
 use App\Models\Seeker;
 use App\Models\Company;
+use App\Services\StorageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
 class UserController extends Controller
@@ -295,7 +297,7 @@ class UserController extends Controller
     /**
      * Update the specified company
      */
-    public function companiesUpdate(Request $request, Company $company)
+    public function companiesUpdate(Request $request, Company $company, StorageService $storageService)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -305,7 +307,16 @@ class UserController extends Controller
             'company_name' => 'required|string|max:255',
             'company_size' => 'nullable|string|max:50',
             'industry' => 'nullable|string|max:255',
+            'organization_type' => 'nullable|string|max:120',
             'website' => 'nullable|url|max:255',
+            'address' => 'nullable|string|max:255',
+            'city' => 'nullable|string|max:120',
+            'country' => 'nullable|string|max:120',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
+            'about' => 'nullable|string',
+            'logo' => 'nullable|image|max:50',
+            'banner' => 'nullable|image|max:500',
             'status' => 'required|in:active,inactive',
         ]);
 
@@ -315,8 +326,31 @@ class UserController extends Controller
         $company->company_name = $validated['company_name'];
         $company->company_size = $validated['company_size'] ?? null;
         $company->industry = $validated['industry'] ?? null;
+        $company->organization_type = $validated['organization_type'] ?? null;
         $company->website = $validated['website'] ?? null;
+        $company->address = $validated['address'] ?? null;
+        $company->city = $validated['city'] ?? null;
+        $company->country = $validated['country'] ?? null;
+        $company->latitude = $validated['latitude'] ?? null;
+        $company->longitude = $validated['longitude'] ?? null;
+        $company->about = $validated['about'] ?? null;
         $company->status = $validated['status'];
+
+        // Handle logo upload
+        if ($request->hasFile('logo')) {
+            if ($company->logo_path) {
+                $storageService->delete($company->logo_path);
+            }
+            $company->logo_path = $storageService->storeFile($request->file('logo'), 'company-media');
+        }
+
+        // Handle banner upload
+        if ($request->hasFile('banner')) {
+            if ($company->banner_path) {
+                $storageService->delete($company->banner_path);
+            }
+            $company->banner_path = $storageService->storeFile($request->file('banner'), 'company-media');
+        }
 
         if (!empty($validated['password'])) {
             $company->password = Hash::make($validated['password']);

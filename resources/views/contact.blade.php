@@ -130,8 +130,9 @@
                         </div>
                     @endif
 
-                    <form action="{{ route('contact.store') }}" method="POST" class="contact-form">
+                    <form action="{{ route('contact.store') }}" method="POST" class="contact-form" id="contactForm">
                         @csrf
+                        <input type="hidden" name="g-recaptcha-response" id="g-recaptcha-response">
 
                         <div class="contact-form-row">
                             <div class="contact-form-group">
@@ -227,6 +228,24 @@
             </div>
         </div>
     </div>
+    
+    @push('scripts')
+    <script>
+    document.getElementById('contactForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const form = this;
+        
+        if (window.recaptchaSiteKey) {
+            executeRecaptcha('contact').then(function(token) {
+                document.getElementById('g-recaptcha-response').value = token;
+                form.submit();
+            });
+        } else {
+            form.submit();
+        }
+    });
+    </script>
+    @endpush
 
     <style>
         .contact-hero {

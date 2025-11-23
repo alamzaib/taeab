@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\Admin;
+use App\Services\RecaptchaService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -16,12 +17,19 @@ class AdminAuthController extends Controller
         return view('auth.admin.login');
     }
 
-    public function login(Request $request)
+    public function login(Request $request, RecaptchaService $recaptcha)
     {
         $request->validate([
             'email' => 'required|email',
             'password' => 'required',
         ]);
+
+        // Verify reCAPTCHA
+        if (!$recaptcha->verify($request->input('g-recaptcha-response'), $request->ip())) {
+            throw ValidationException::withMessages([
+                'g-recaptcha-response' => ['reCAPTCHA verification failed. Please try again.'],
+            ]);
+        }
 
         if (Auth::guard('admin')->attempt($request->only('email', 'password'), $request->filled('remember'))) {
             $request->session()->regenerate();

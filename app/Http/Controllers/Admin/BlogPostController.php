@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\BlogPost;
+use App\Services\StorageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -36,14 +37,14 @@ class BlogPostController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request, StorageService $storageService)
     {
         $data = $this->validateBlogPost($request);
 
         $data['slug'] = $this->makeSlug($data['title'], $data['slug'] ?? null);
 
         if ($request->hasFile('featured_image')) {
-            $data['featured_image'] = $request->file('featured_image')->store('blog', 'public');
+            $data['featured_image'] = $storageService->storeFile($request->file('featured_image'), 'blog');
         }
 
         $data['admin_id'] = Auth::guard('admin')->id();
@@ -85,14 +86,14 @@ class BlogPostController extends Controller
         $data['slug'] = $this->makeSlug($data['title'], $data['slug'] ?? $blogPost->slug, $blogPost->id);
 
         if ($request->hasFile('featured_image')) {
-            if ($blogPost->featured_image && Storage::disk('public')->exists($blogPost->featured_image)) {
-                Storage::disk('public')->delete($blogPost->featured_image);
+            if ($blogPost->featured_image) {
+                $storageService->delete($blogPost->featured_image);
             }
 
-            $data['featured_image'] = $request->file('featured_image')->store('blog', 'public');
+            $data['featured_image'] = $storageService->storeFile($request->file('featured_image'), 'blog');
         } elseif ($request->boolean('remove_featured_image')) {
-            if ($blogPost->featured_image && Storage::disk('public')->exists($blogPost->featured_image)) {
-                Storage::disk('public')->delete($blogPost->featured_image);
+            if ($blogPost->featured_image) {
+                $storageService->delete($blogPost->featured_image);
             }
             $data['featured_image'] = null;
         }
@@ -111,10 +112,10 @@ class BlogPostController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(BlogPost $blogPost)
+    public function destroy(BlogPost $blogPost, StorageService $storageService)
     {
-        if ($blogPost->featured_image && Storage::disk('public')->exists($blogPost->featured_image)) {
-            Storage::disk('public')->delete($blogPost->featured_image);
+        if ($blogPost->featured_image) {
+            $storageService->delete($blogPost->featured_image);
         }
 
         $blogPost->delete();

@@ -16,7 +16,7 @@ class ProfileController extends Controller
         return view('seeker.profile.edit', compact('seeker'));
     }
 
-    public function update(Request $request)
+    public function update(Request $request, StorageService $storageService)
     {
         $seeker = $request->user('seeker');
 
@@ -61,16 +61,16 @@ class ProfileController extends Controller
 
         if ($request->hasFile('profile_photo')) {
             if ($seeker->profile_photo_path) {
-                Storage::disk('public')->delete($seeker->profile_photo_path);
+                $storageService->delete($seeker->profile_photo_path);
             }
-            $seeker->profile_photo_path = $request->file('profile_photo')->store('seeker-media', 'public');
+            $seeker->profile_photo_path = $storageService->storeFile($request->file('profile_photo'), 'seeker-media');
         }
 
         if ($request->hasFile('profile_cover')) {
             if ($seeker->profile_cover_path) {
-                Storage::disk('public')->delete($seeker->profile_cover_path);
+                $storageService->delete($seeker->profile_cover_path);
             }
-            $seeker->profile_cover_path = $request->file('profile_cover')->store('seeker-media', 'public');
+            $seeker->profile_cover_path = $storageService->storeFile($request->file('profile_cover'), 'seeker-media');
         }
 
         if (!empty($validated['password'])) {

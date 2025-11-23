@@ -1,5 +1,12 @@
 @php
     use Illuminate\Support\Facades\Storage;
+    use App\Models\CompanySize;
+    use App\Models\Industry;
+    use App\Models\OrganizationType;
+    
+    $companySizes = CompanySize::where('is_active', true)->orderBy('sort_order')->orderBy('name')->get();
+    $industries = Industry::where('is_active', true)->orderBy('sort_order')->orderBy('name')->get();
+    $organizationTypes = OrganizationType::where('is_active', true)->orderBy('sort_order')->orderBy('name')->get();
 @endphp
 
 @extends('layouts.app')
@@ -64,18 +71,39 @@
             <div class="auth-dual">
                 <div class="form-group">
                     <label for="company_size">Company Size</label>
-                    <input type="text" id="company_size" name="company_size" class="form-control" value="{{ old('company_size', $company->company_size) }}">
+                    <select id="company_size" name="company_size" class="form-control">
+                        <option value="">Select Company Size</option>
+                        @foreach($companySizes as $size)
+                            <option value="{{ $size->name }}" {{ old('company_size', $company->company_size) == $size->name ? 'selected' : '' }}>
+                                {{ $size->name }}
+                            </option>
+                        @endforeach
+                    </select>
                 </div>
                 <div class="form-group">
                     <label for="industry">Industry</label>
-                    <input type="text" id="industry" name="industry" class="form-control" value="{{ old('industry', $company->industry) }}">
+                    <select id="industry" name="industry" class="form-control">
+                        <option value="">Select Industry</option>
+                        @foreach($industries as $ind)
+                            <option value="{{ $ind->name }}" {{ old('industry', $company->industry) == $ind->name ? 'selected' : '' }}>
+                                {{ $ind->name }}
+                            </option>
+                        @endforeach
+                    </select>
                 </div>
             </div>
 
             <div class="auth-dual">
                 <div class="form-group">
                     <label for="organization_type">Organization Type</label>
-                    <input type="text" id="organization_type" name="organization_type" class="form-control" value="{{ old('organization_type', $company->organization_type) }}">
+                    <select id="organization_type" name="organization_type" class="form-control">
+                        <option value="">Select Organization Type</option>
+                        @foreach($organizationTypes as $orgType)
+                            <option value="{{ $orgType->name }}" {{ old('organization_type', $company->organization_type) == $orgType->name ? 'selected' : '' }}>
+                                {{ $orgType->name }}
+                            </option>
+                        @endforeach
+                    </select>
                 </div>
                 <div class="form-group">
                     <label for="website">Website</label>
@@ -113,8 +141,9 @@
                 <div class="form-group">
                     <label for="logo">Company Logo</label>
                     <input type="file" id="logo" name="logo" class="form-control">
+                    <small style="color: #6b7280; font-size: 12px;">Max size: 50KB</small>
                     @if($company->logo_path)
-                        <small><a href="{{ Storage::disk('public')->url($company->logo_path) }}" target="_blank">View current logo</a></small>
+                        <small><a href="{{ storage_url($company->logo_path) }}" target="_blank">View current logo</a></small>
                     @endif
                 </div>
             </div>
@@ -122,8 +151,9 @@
             <div class="form-group">
                 <label for="banner">Profile Banner</label>
                 <input type="file" id="banner" name="banner" class="form-control">
+                <small style="color: #6b7280; font-size: 12px;">Max size: 500KB</small>
                 @if($company->banner_path)
-                    <small><a href="{{ Storage::disk('public')->url($company->banner_path) }}" target="_blank">View current banner</a></small>
+                    <small><a href="{{ storage_url($company->banner_path) }}" target="_blank">View current banner</a></small>
                 @endif
             </div>
 

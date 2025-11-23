@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\Company;
+use App\Services\RecaptchaService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -16,12 +17,19 @@ class CompanyAuthController extends Controller
         return view('auth.company.login');
     }
 
-    public function login(Request $request)
+    public function login(Request $request, RecaptchaService $recaptcha)
     {
         $request->validate([
             'email' => 'required|email',
             'password' => 'required',
         ]);
+
+        // Verify reCAPTCHA
+        if (!$recaptcha->verify($request->input('g-recaptcha-response'), $request->ip())) {
+            throw ValidationException::withMessages([
+                'g-recaptcha-response' => ['reCAPTCHA verification failed. Please try again.'],
+            ]);
+        }
 
         if (Auth::guard('company')->attempt($request->only('email', 'password'), $request->filled('remember'))) {
             $request->session()->regenerate();
@@ -38,7 +46,7 @@ class CompanyAuthController extends Controller
         return view('auth.company.register');
     }
 
-    public function register(Request $request)
+    public function register(Request $request, RecaptchaService $recaptcha)
     {
         $request->validate([
             'name' => 'required|string|max:255',
@@ -50,6 +58,11 @@ class CompanyAuthController extends Controller
             'industry' => 'nullable|string|max:255',
             'website' => 'nullable|url|max:255',
         ]);
+
+        // Verify reCAPTCHA
+        if (!$recaptcha->verify($request->input('g-recaptcha-response'), $request->ip())) {
+            return back()->withErrors(['g-recaptcha-response' => 'reCAPTCHA verification failed. Please try again.'])->withInput();
+        }
 
         $company = Company::create([
             'name' => $request->name,

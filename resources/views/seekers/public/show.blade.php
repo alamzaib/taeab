@@ -26,7 +26,7 @@
                                 class="hero-action-button hero-action-outline">LinkedIn</a>
                         @endif
                         @if ($defaultResume)
-                            <a href="{{ Storage::disk('public')->url($defaultResume->file_path) }}" target="_blank"
+                            <a href="{{ storage_url($defaultResume->file_path) }}" target="_blank"
                                 rel="noopener" class="hero-action-button hero-action-light">Download CV</a>
                         @endif
                         <button type="button" id="downloadPublicProfile"

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Notification;
+use App\Services\RecaptchaService;
 use Illuminate\Http\Request;
 
 class ContactController extends Controller
@@ -12,7 +13,7 @@ class ContactController extends Controller
         return view('contact');
     }
 
-    public function store(Request $request)
+    public function store(Request $request, RecaptchaService $recaptcha)
     {
         $request->validate([
             'name' => 'required|string|max:255',
@@ -20,6 +21,11 @@ class ContactController extends Controller
             'subject' => 'required|string|max:255',
             'message' => 'required|string|min:10|max:2000',
         ]);
+
+        // Verify reCAPTCHA
+        if (!$recaptcha->verify($request->input('g-recaptcha-response'), $request->ip())) {
+            return back()->withErrors(['g-recaptcha-response' => 'reCAPTCHA verification failed. Please try again.'])->withInput();
+        }
 
         $settings = \App\Models\Setting::getAll();
         $adminEmail = $settings['official_email'] ?? config('mail.from.address');

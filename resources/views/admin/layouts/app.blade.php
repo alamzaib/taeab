@@ -18,8 +18,14 @@
         $settings = \App\Models\Setting::getAll();
     @endphp
 
-    @if (!empty($settings['favicon']))
-        <link rel="icon" type="image/png" href="{{ Storage::url($settings['favicon']) }}">
+    @php
+        $faviconUrl = null;
+        if (!empty($settings['favicon'])) {
+            $faviconUrl = storage_url($settings['favicon']);
+        }
+    @endphp
+    @if (!empty($faviconUrl))
+        <link rel="icon" type="image/png" href="{{ $faviconUrl }}">
     @endif
 
     @if (!empty($settings['google_analytics_code']))
@@ -82,9 +88,13 @@
             <a href="{{ route('admin.dashboard') }}" class="brand-link" style="float: left;">
                 @php
                     $settings = \App\Models\Setting::getAll();
-                    $logoPath = !empty($settings['application_logo'])
-                        ? Storage::url($settings['application_logo'])
-                        : asset('images/logo.svg');
+                    $logoPath = asset('images/logo.svg'); // Default fallback
+                    if (!empty($settings['application_logo'])) {
+                        $generatedLogoUrl = storage_url($settings['application_logo']);
+                        if (!empty($generatedLogoUrl)) {
+                            $logoPath = $generatedLogoUrl;
+                        }
+                    }
                 @endphp
                 <img src="{{ $logoPath }}" alt="Logo" class="brand-image img-circle elevation-3"
                     style="opacity: .8; max-height: 33px;">
@@ -117,6 +127,14 @@
                                 class="nav-link {{ request()->is('admin/pages*') ? 'active' : '' }}">
                                 <i class="nav-icon fas fa-file-alt"></i>
                                 <p>Pages</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="{{ route('admin.payment-links.index') }}"
+                                class="nav-link {{ request()->is('admin/payment-links*') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-credit-card"></i>
+                                <p>Payment Links</p>
                             </a>
                         </li>
 

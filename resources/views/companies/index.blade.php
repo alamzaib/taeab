@@ -13,9 +13,12 @@
 @endphp
 
 <div class="companies-shell container">
+    <button class="filter-toggle-btn" id="filter-toggle-btn" aria-label="Toggle filters">
+        <span>☰</span> Filters
+    </button>
     <div class="card companies-wrapper">
         <div class="companies-grid">
-            <aside class="companies-filter-panel">
+            <aside class="companies-filter-panel" id="companies-filter-panel">
                 <div class="filter-panel-header">
                     <div>
                         <p class="eyebrow">Filter organisations</p>
@@ -417,26 +420,198 @@
         color: #94a3b8;
         text-transform: uppercase;
     }
+    .filter-toggle-btn {
+        display: none;
+        position: fixed;
+        top: 70px;
+        left: 20px;
+        z-index: 999;
+        background: #235181;
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: 500;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    .filter-toggle-btn span {
+        margin-right: 8px;
+        font-size: 20px;
+    }
+
     @media screen and (max-width: 1024px) {
+        .filter-toggle-btn {
+            display: block;
+        }
+
         .companies-grid {
             grid-template-columns: 1fr;
         }
+
         .companies-filter-panel {
-            position: static;
+            position: fixed;
+            top: 0;
+            left: -100%;
+            width: 320px;
+            height: 100vh;
+            z-index: 998;
+            transition: left 0.3s ease;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+            overflow-y: auto;
+            border-radius: 0;
+            border: none;
         }
+
+        .companies-filter-panel.active {
+            left: 0;
+        }
+
+        .companies-filter-panel::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            z-index: -1;
+        }
+
+        .companies-filter-panel.active::before {
+            display: block;
+        }
+
+        .companies-results-header {
+            flex-direction: column;
+            gap: 12px;
+        }
+
         .company-card-header {
             grid-template-columns: 1fr;
             text-align: left;
         }
+
         .company-logo-section {
             flex-direction: row;
             align-items: center;
             justify-content: flex-start;
         }
+
         .company-status {
             text-align: left;
         }
     }
+
+    @media screen and (max-width: 768px) {
+        .companies-wrapper {
+            padding: 20px 15px !important;
+        }
+
+        .companies-results-header h1 {
+            font-size: 22px;
+        }
+
+        .companies-result-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .company-card {
+            padding: 18px;
+        }
+
+        .company-card-title {
+            font-size: 18px;
+        }
+
+        .filter-toggle-btn {
+            left: 10px;
+            top: 60px;
+            padding: 10px 15px;
+            font-size: 14px;
+        }
+
+        .companies-filter-panel {
+            width: 100%;
+        }
+
+        .sort-form {
+            width: 100%;
+        }
+
+        .sort-form select {
+            width: 100%;
+        }
+    }
+
+    @media screen and (max-width: 480px) {
+        .companies-wrapper {
+            padding: 15px 10px !important;
+        }
+
+        .company-card {
+            padding: 15px;
+        }
+
+        .companies-results-header h1 {
+            font-size: 20px;
+        }
+
+        .company-card-footer {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .company-card-footer .btn-primary {
+            width: 100%;
+        }
+
+        .filter-actions {
+            flex-direction: column;
+        }
+
+        .filter-actions .btn {
+            width: 100%;
+        }
+    }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const filterToggle = document.getElementById('filter-toggle-btn');
+    const filterPanel = document.getElementById('companies-filter-panel');
+    
+    if (filterToggle && filterPanel) {
+        filterToggle.addEventListener('click', function(e) {
+            e.stopPropagation();
+            filterPanel.classList.toggle('active');
+            document.body.style.overflow = filterPanel.classList.contains('active') ? 'hidden' : '';
+        });
+
+        // Close filter panel when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!filterPanel.contains(e.target) && !filterToggle.contains(e.target)) {
+                filterPanel.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+
+        // Close filter panel when form is submitted
+        const filterForm = filterPanel.querySelector('.filter-form');
+        if (filterForm) {
+            filterForm.addEventListener('submit', function() {
+                setTimeout(function() {
+                    filterPanel.classList.remove('active');
+                    document.body.style.overflow = '';
+                }, 100);
+            });
+        }
+    }
+});
+</script>
 @endsection
 

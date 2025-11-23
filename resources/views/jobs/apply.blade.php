@@ -24,7 +24,13 @@
         </div>
     @endif
 
-    <form method="POST" action="{{ route('jobs.apply', $job->slug) }}" class="apply-form">
+    @if (session('error'))
+        <div class="alert alert-danger">
+            {{ session('error') }}
+        </div>
+    @endif
+
+    <form method="POST" action="{{ route('jobs.apply', $job->slug) }}" class="apply-form" id="jobApplicationForm">
         @csrf
         <div class="apply-grid">
             <section class="card apply-card">
@@ -43,7 +49,7 @@
                                     <strong>{{ $resume->title ?? $resume->file_name }}</strong>
                                     <p class="muted-text">Uploaded {{ $resume->created_at->format('M d, Y') }}</p>
                                 </div>
-                                <a href="{{ Storage::disk('public')->url($resume->file_path) }}" target="_blank" class="btn btn-light btn-sm">Preview</a>
+                                <a href="{{ storage_url($resume->file_path) }}" target="_blank" class="btn btn-light btn-sm">Preview</a>
                             </label>
                         @endforeach
                     </div>
@@ -71,7 +77,7 @@
                                     <strong>{{ $cover->title ?? $cover->file_name }}</strong>
                                     <p class="muted-text">Uploaded {{ $cover->created_at->format('M d, Y') }}</p>
                                 </div>
-                                <a href="{{ Storage::disk('public')->url($cover->file_path) }}" target="_blank" class="btn btn-light btn-sm">Preview</a>
+                                <a href="{{ storage_url($cover->file_path) }}" target="_blank" class="btn btn-light btn-sm">Preview</a>
                             </label>
                         @endforeach
                     </div>
@@ -105,11 +111,29 @@
                         <strong>{{ $job->location ?? 'UAE' }}</strong>
                     </li>
                 </ul>
-                <button type="submit" class="btn-primary btn-lg" {{ $resumes->isEmpty() ? 'disabled style=opacity:0.6;' : '' }}>
-                    Submit application
-                </button>
+                
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <button type="submit" form="jobApplicationForm" class="btn-primary btn-lg" {{ $resumes->isEmpty() ? 'disabled style=opacity:0.6;' : '' }}>
+                        Submit application
+                    </button>
+                    
+                    <div style="text-align: center; margin: 8px 0; color: #94a3b8; font-size: 14px;">OR</div>
+                    
+                    <button type="button" id="linkedinApplyBtn" class="btn-linkedin btn-lg" style="width: 100%;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="vertical-align: middle; margin-right: 8px;">
+                            <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                        </svg>
+                        Apply with LinkedIn
+                    </button>
+                </div>
             </aside>
         </div>
+    </form>
+    
+    <!-- Separate form for LinkedIn application -->
+    <form method="POST" action="{{ route('jobs.apply.linkedin', $job->slug) }}" id="linkedinApplyForm" style="position: absolute; left: -9999px; visibility: hidden;">
+        @csrf
+        <input type="hidden" name="cover_letter" id="linkedin_cover_letter" value="">
     </form>
 </div>
 
@@ -207,11 +231,71 @@
         font-size: 13px;
         color: #94a3b8;
     }
+    .btn-linkedin {
+        background-color: #0077b5;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.3s;
+        text-decoration: none;
+    }
+    .btn-linkedin:hover:not(:disabled) {
+        background-color: #005885;
+        color: white;
+    }
+    .btn-linkedin:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
     @media screen and (max-width: 1024px) {
         .apply-grid {
             grid-template-columns: 1fr;
         }
     }
 </style>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const linkedinBtn = document.getElementById('linkedinApplyBtn');
+    const linkedinForm = document.getElementById('linkedinApplyForm');
+    const coverLetterTextarea = document.getElementById('cover_letter');
+    const linkedinCoverLetterInput = document.getElementById('linkedin_cover_letter');
+    
+    if (linkedinBtn && linkedinForm) {
+        linkedinBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Copy cover letter value to LinkedIn form if textarea exists
+            if (coverLetterTextarea && linkedinCoverLetterInput) {
+                linkedinCoverLetterInput.value = coverLetterTextarea.value || '';
+            }
+            
+            // Show loading state
+            const originalHtml = linkedinBtn.innerHTML;
+            linkedinBtn.disabled = true;
+            linkedinBtn.innerHTML = '<span>Redirecting to LinkedIn...</span>';
+            
+            // Submit the form - this will cause a page navigation to LinkedIn
+            setTimeout(function() {
+                linkedinForm.submit();
+            }, 100);
+        });
+    } else {
+        console.error('LinkedIn apply elements not found', {
+            btn: !!linkedinBtn,
+            form: !!linkedinForm
+        });
+    }
+});
+</script>
+@endpush
 @endsection
 

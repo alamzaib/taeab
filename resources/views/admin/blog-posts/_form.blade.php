@@ -79,7 +79,7 @@
 
             @if($post->featured_image)
                 <div class="mt-2">
-                    <img src="{{ Storage::url($post->featured_image) }}" alt="" class="img-fluid rounded mb-2" style="max-height: 150px;">
+                    <img src="{{ storage_url($post->featured_image) }}" alt="" class="img-fluid rounded mb-2" style="max-height: 150px;">
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" name="remove_featured_image" value="1" id="remove_featured_image">
                         <label class="form-check-label" for="remove_featured_image">Remove current image</label>

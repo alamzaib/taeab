@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\Seeker;
+use App\Services\RecaptchaService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -17,12 +18,19 @@ class SeekerAuthController extends Controller
         return view('auth.seeker.login');
     }
 
-    public function login(Request $request)
+    public function login(Request $request, RecaptchaService $recaptcha)
     {
         $request->validate([
             'email' => 'required|email',
             'password' => 'required',
         ]);
+
+        // Verify reCAPTCHA
+        if (!$recaptcha->verify($request->input('g-recaptcha-response'), $request->ip())) {
+            throw ValidationException::withMessages([
+                'g-recaptcha-response' => ['reCAPTCHA verification failed. Please try again.'],
+            ]);
+        }
 
         $credentials = $request->only('email', 'password');
 
@@ -47,7 +55,7 @@ class SeekerAuthController extends Controller
         return view('auth.seeker.register');
     }
 
-    public function register(Request $request)
+    public function register(Request $request, RecaptchaService $recaptcha)
     {
         $request->validate([
             'name' => 'required|string|max:255',
@@ -55,6 +63,11 @@ class SeekerAuthController extends Controller
             'password' => 'required|string|min:8|confirmed',
             'phone' => 'required|string|max:20',
         ]);
+
+        // Verify reCAPTCHA
+        if (!$recaptcha->verify($request->input('g-recaptcha-response'), $request->ip())) {
+            return back()->withErrors(['g-recaptcha-response' => 'reCAPTCHA verification failed. Please try again.'])->withInput();
+        }
 
         $seeker = Seeker::create([
             'name' => $request->name,

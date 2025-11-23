@@ -17,8 +17,9 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('company.register') }}">
+        <form method="POST" action="{{ route('company.register') }}" id="companyRegisterForm">
             @csrf
+            <input type="hidden" name="g-recaptcha-response" id="g-recaptcha-response">
             <div class="form-group">
                 <label for="name">Contact Person Name</label>
                 <input type="text" id="name" name="name" class="form-control" value="{{ old('name') }}" required autofocus>
@@ -81,5 +82,22 @@
         </form>
     </div>
 </div>
+@push('scripts')
+<script>
+document.getElementById('companyRegisterForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const form = this;
+    
+    if (window.recaptchaSiteKey) {
+        executeRecaptcha('register').then(function(token) {
+            document.getElementById('g-recaptcha-response').value = token;
+            form.submit();
+        });
+    } else {
+        form.submit();
+    }
+});
+</script>
+@endpush
 @endsection
 

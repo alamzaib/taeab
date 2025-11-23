@@ -5,7 +5,13 @@
                 <a href="{{ url('/') }}" class="footer-logo">
                     @php
                         $settings = \App\Models\Setting::getAll();
-                        $footerLogoPath = !empty($settings['footer_logo']) ? Storage::url($settings['footer_logo']) : asset('images/logo.svg');
+                        $footerLogoPath = asset('images/logo.svg'); // Default fallback
+                        if (!empty($settings['footer_logo'])) {
+                            $generatedUrl = storage_url($settings['footer_logo']);
+                            if (!empty($generatedUrl)) {
+                                $footerLogoPath = $generatedUrl;
+                            }
+                        }
                     @endphp
                     <img src="{{ $footerLogoPath }}" alt="Job Portal UAE" class="footer-logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
                     <span class="footer-logo-text">Job Portal UAE</span>
@@ -122,6 +128,39 @@
     margin-bottom: 30px;
 }
 
+@media (max-width: 768px) {
+    .footer-container {
+        padding: 30px 15px 15px;
+    }
+
+    .footer-content {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+
+    .footer-section {
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .footer-container {
+        padding: 20px 10px 10px;
+    }
+
+    .footer-content {
+        gap: 25px;
+    }
+
+    .footer-heading {
+        font-size: 18px;
+    }
+
+    .footer-links {
+        font-size: 14px;
+    }
+}
+
 .footer-section {
     display: flex;
     flex-direction: column;
@@ -224,9 +263,35 @@
 }
 
 @media (max-width: 768px) {
+    .footer-container {
+        padding: 30px 15px 15px;
+    }
+
     .footer-content {
         grid-template-columns: 1fr;
         gap: 30px;
+    }
+
+    .footer-section {
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .footer-container {
+        padding: 20px 10px 10px;
+    }
+
+    .footer-content {
+        gap: 25px;
+    }
+
+    .footer-heading {
+        font-size: 18px;
+    }
+
+    .footer-links {
+        font-size: 14px;
     }
 }
 </style>

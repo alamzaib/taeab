@@ -17,8 +17,9 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('admin.login') }}">
+        <form method="POST" action="{{ route('admin.login') }}" id="adminLoginForm">
             @csrf
+            <input type="hidden" name="g-recaptcha-response" id="g-recaptcha-response">
             <div class="form-group">
                 <label for="email">Email Address</label>
                 <input type="email" id="email" name="email" class="form-control" value="{{ old('email') }}" required autofocus>
@@ -41,5 +42,22 @@
         </form>
     </div>
 </div>
+@push('scripts')
+<script>
+document.getElementById('adminLoginForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const form = this;
+    
+    if (window.recaptchaSiteKey) {
+        executeRecaptcha('login').then(function(token) {
+            document.getElementById('g-recaptcha-response').value = token;
+            form.submit();
+        });
+    } else {
+        form.submit();
+    }
+});
+</script>
+@endpush
 @endsection
 

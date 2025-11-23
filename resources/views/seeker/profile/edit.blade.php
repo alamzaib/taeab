@@ -156,14 +156,14 @@
                     <label for="profile_photo">Profile Photo</label>
                     <input type="file" id="profile_photo" name="profile_photo" class="form-control">
                     @if($seeker->profile_photo_path)
-                        <small><a href="{{ Storage::disk('public')->url($seeker->profile_photo_path) }}" target="_blank">View current photo</a></small>
+                        <small><a href="{{ storage_url($seeker->profile_photo_path) }}" target="_blank">View current photo</a></small>
                     @endif
                 </div>
                 <div class="form-group">
                     <label for="profile_cover">Cover Image</label>
                     <input type="file" id="profile_cover" name="profile_cover" class="form-control">
                     @if($seeker->profile_cover_path)
-                        <small><a href="{{ Storage::disk('public')->url($seeker->profile_cover_path) }}" target="_blank">View current cover</a></small>
+                        <small><a href="{{ storage_url($seeker->profile_cover_path) }}" target="_blank">View current cover</a></small>
                     @endif
                 </div>
             </div>

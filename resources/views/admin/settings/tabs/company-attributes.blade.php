@@ -33,7 +33,7 @@
                 <tbody>
                     @forelse($companySizes ?? [] as $companySize)
                         <tr>
-                            <form method="POST" action="{{ route('admin.settings.company-sizes.update', $companySize) }}">
+                            <form method="POST" action="{{ route('admin.settings.company-sizes.update', $companySize) }}" id="update-form-{{ $companySize->id }}" style="display: contents;">
                                 @csrf
                                 @method('PUT')
                                 <td><input type="text" name="name" class="form-control" value="{{ $companySize->name }}" required></td>
@@ -46,10 +46,14 @@
                                 </td>
                                 <td>
                                     <button type="submit" class="btn btn-sm btn-primary">Update</button>
-                                    <a href="{{ route('admin.settings.company-sizes.destroy', $companySize) }}" class="btn btn-sm btn-danger" onclick="return confirm('Delete this company size?')">Delete</a>
+                                    <button type="button" class="btn btn-sm btn-danger" onclick="if(confirm('Delete this company size?')) { document.getElementById('delete-form-{{ $companySize->id }}').submit(); }">Delete</button>
                                 </td>
                             </form>
                         </tr>
+                        <form method="POST" action="{{ route('admin.settings.company-sizes.destroy', $companySize) }}" id="delete-form-{{ $companySize->id }}" style="display: none;">
+                            @csrf
+                            @method('DELETE')
+                        </form>
                     @empty
                         <tr>
                             <td colspan="4" class="text-center">No company sizes found.</td>
@@ -89,7 +93,7 @@
                 <tbody>
                     @forelse($industries ?? [] as $industry)
                         <tr>
-                            <form method="POST" action="{{ route('admin.settings.industries.update', $industry) }}">
+                            <form method="POST" action="{{ route('admin.settings.industries.update', $industry) }}" id="update-form-industry-{{ $industry->id }}" style="display: contents;">
                                 @csrf
                                 @method('PUT')
                                 <td><input type="text" name="name" class="form-control" value="{{ $industry->name }}" required></td>
@@ -102,10 +106,14 @@
                                 </td>
                                 <td>
                                     <button type="submit" class="btn btn-sm btn-primary">Update</button>
-                                    <a href="{{ route('admin.settings.industries.destroy', $industry) }}" class="btn btn-sm btn-danger" onclick="return confirm('Delete this industry?')">Delete</a>
+                                    <button type="button" class="btn btn-sm btn-danger" onclick="if(confirm('Delete this industry?')) { document.getElementById('delete-form-industry-{{ $industry->id }}').submit(); }">Delete</button>
                                 </td>
                             </form>
                         </tr>
+                        <form method="POST" action="{{ route('admin.settings.industries.destroy', $industry) }}" id="delete-form-industry-{{ $industry->id }}" style="display: none;">
+                            @csrf
+                            @method('DELETE')
+                        </form>
                     @empty
                         <tr>
                             <td colspan="4" class="text-center">No industries found.</td>
@@ -145,7 +153,7 @@
                 <tbody>
                     @forelse($organizationTypes ?? [] as $organizationType)
                         <tr>
-                            <form method="POST" action="{{ route('admin.settings.organization-types.update', $organizationType) }}">
+                            <form method="POST" action="{{ route('admin.settings.organization-types.update', $organizationType) }}" id="update-form-org-{{ $organizationType->id }}" style="display: contents;">
                                 @csrf
                                 @method('PUT')
                                 <td><input type="text" name="name" class="form-control" value="{{ $organizationType->name }}" required></td>
@@ -158,10 +166,14 @@
                                 </td>
                                 <td>
                                     <button type="submit" class="btn btn-sm btn-primary">Update</button>
-                                    <a href="{{ route('admin.settings.organization-types.destroy', $organizationType) }}" class="btn btn-sm btn-danger" onclick="return confirm('Delete this organization type?')">Delete</a>
+                                    <button type="button" class="btn btn-sm btn-danger" onclick="if(confirm('Delete this organization type?')) { document.getElementById('delete-form-org-{{ $organizationType->id }}').submit(); }">Delete</button>
                                 </td>
                             </form>
                         </tr>
+                        <form method="POST" action="{{ route('admin.settings.organization-types.destroy', $organizationType) }}" id="delete-form-org-{{ $organizationType->id }}" style="display: none;">
+                            @csrf
+                            @method('DELETE')
+                        </form>
                     @empty
                         <tr>
                             <td colspan="4" class="text-center">No organization types found.</td>

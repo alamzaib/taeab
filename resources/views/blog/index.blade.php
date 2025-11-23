@@ -17,7 +17,7 @@
             <article class="blog-card">
                 @if($post->featured_image)
                     <div class="blog-card-image">
-                        <img src="{{ Storage::url($post->featured_image) }}" alt="{{ $post->title }}">
+                        <img src="{{ storage_url($post->featured_image) }}" alt="{{ $post->title }}">
                     </div>
                 @endif
                 <div class="blog-card-body">

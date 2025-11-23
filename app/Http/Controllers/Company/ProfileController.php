@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Company;
 
 use App\Http\Controllers\Controller;
+use App\Services\StorageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -16,7 +17,7 @@ class ProfileController extends Controller
         return view('company.profile.edit', compact('company'));
     }
 
-    public function update(Request $request)
+    public function update(Request $request, StorageService $storageService)
     {
         $company = $request->user('company');
 
@@ -34,8 +35,8 @@ class ProfileController extends Controller
             'longitude' => ['nullable', 'numeric', 'between:-180,180'],
             'organization_type' => ['nullable', 'string', 'max:120'],
             'about' => ['nullable', 'string'],
-            'logo' => ['nullable', 'image', 'max:2048'],
-            'banner' => ['nullable', 'image', 'max:4096'],
+            'logo' => ['nullable', 'image', 'max:50'],
+            'banner' => ['nullable', 'image', 'max:500'],
             'password' => ['nullable', 'string', 'min:8', 'confirmed'],
         ]);
 
@@ -58,16 +59,16 @@ class ProfileController extends Controller
 
         if ($request->hasFile('logo')) {
             if ($company->logo_path) {
-                Storage::disk('public')->delete($company->logo_path);
+                $storageService->delete($company->logo_path);
             }
-            $company->logo_path = $request->file('logo')->store('company-media', 'public');
+            $company->logo_path = $storageService->storeFile($request->file('logo'), 'company-media');
         }
 
         if ($request->hasFile('banner')) {
             if ($company->banner_path) {
-                Storage::disk('public')->delete($company->banner_path);
+                $storageService->delete($company->banner_path);
             }
-            $company->banner_path = $request->file('banner')->store('company-media', 'public');
+            $company->banner_path = $storageService->storeFile($request->file('banner'), 'company-media');
         }
 
         if (!empty($validated['password'])) {

@@ -131,7 +131,7 @@
                         <li>
                             <span>Resume</span>
                             @if($defaultResume)
-                                <a href="{{ Storage::disk('public')->url($defaultResume->file_path) }}" target="_blank">{{ $defaultResume->file_name }}</a>
+                                <a href="{{ storage_url($defaultResume->file_path) }}" target="_blank">{{ $defaultResume->file_name }}</a>
                             @else
                                 <em>Not set</em>
                             @endif
@@ -139,7 +139,7 @@
                         <li>
                             <span>Cover letter</span>
                             @if($defaultCover)
-                                <a href="{{ Storage::disk('public')->url($defaultCover->file_path) }}" target="_blank">{{ $defaultCover->file_name }}</a>
+                                <a href="{{ storage_url($defaultCover->file_path) }}" target="_blank">{{ $defaultCover->file_name }}</a>
                             @else
                                 <em>Optional</em>
                             @endif

@@ -11,7 +11,7 @@
     <div class="company-profile-shell container">
         <div class="company-hero card">
             <div class="company-hero-banner"
-                style="background:{{ $company->banner_path ? 'url(' . Storage::disk('public')->url($company->banner_path) . ') center/cover' : 'linear-gradient(135deg,#0f4c75,#1b262c)' }};">
+                style="background:{{ $company->banner_path ? 'url(' . storage_url($company->banner_path) . ') center/cover' : 'linear-gradient(135deg,#0f4c75,#1b262c)' }};">
                 <div class="company-hero-overlay">
                     <div class="company-hero-top">
                         <div class="company-hero-meta">
@@ -114,7 +114,7 @@
                 </div>
                 @if ($company->logo_path)
                     <div class="company-logo">
-                        <img src="{{ Storage::disk('public')->url($company->logo_path) }}"
+                        <img src="{{ storage_url($company->logo_path) }}"
                             alt="{{ $company->company_name ?? $company->name }}">
                     </div>
                 @endif

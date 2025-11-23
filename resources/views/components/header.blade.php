@@ -4,14 +4,27 @@
             <a href="{{ url('/') }}" class="logo">
                 @php
                     $settings = \App\Models\Setting::getAll();
-                    $logoPath = !empty($settings['application_logo'])
-                        ? Storage::url($settings['application_logo'])
-                        : asset('images/logo.svg');
+                    $logoPath = asset('images/logo.svg'); // Default fallback
+                    if (!empty($settings['application_logo'])) {
+                        try {
+                            $generatedUrl = storage_url($settings['application_logo']);
+                            if (!empty($generatedUrl) && $generatedUrl !== asset('images/logo.svg')) {
+                                $logoPath = $generatedUrl;
+                            }
+                        } catch (\Exception $e) {
+                            \Log::error('Error generating logo URL', ['error' => $e->getMessage(), 'path' => $settings['application_logo']]);
+                        }
+                    }
                 @endphp
                 <img src="{{ $logoPath }}" alt="Job Portal UAE" class="logo-img"
                     onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
             </a>
-            <nav class="main-nav">
+            <button class="mobile-menu-toggle" id="mobile-menu-toggle" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <nav class="main-nav" id="main-nav">
                 <a href="{{ url('/') }}" class="nav-link {{ request()->is('/') ? 'active' : '' }}">Home</a>
                 <a href="{{ url('/jobs') }}" class="nav-link {{ request()->is('jobs*') ? 'active' : '' }}">Jobs</a>
                 <a href="{{ url('/companies') }}"
@@ -220,17 +233,107 @@
         background-color: #ffebee;
     }
 
+    .mobile-menu-toggle {
+        display: none;
+        flex-direction: column;
+        gap: 5px;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        padding: 8px;
+        z-index: 1001;
+    }
+
+    .mobile-menu-toggle span {
+        width: 25px;
+        height: 3px;
+        background: white;
+        border-radius: 2px;
+        transition: all 0.3s;
+    }
+
     @media (max-width: 768px) {
+        .mobile-menu-toggle {
+            display: flex;
+        }
+
         .main-nav {
-            gap: 15px;
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 280px;
+            height: 100vh;
+            background: #235181;
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 80px 20px 20px;
+            gap: 0;
+            transition: right 0.3s ease;
+            z-index: 1000;
+            box-shadow: -2px 0 10px rgba(0,0,0,0.2);
+        }
+
+        .main-nav.active {
+            right: 0;
+        }
+
+        .main-nav::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            z-index: -1;
+        }
+
+        .main-nav.active::before {
+            display: block;
         }
 
         .nav-link {
-            font-size: 14px;
+            width: 100%;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            font-size: 16px;
+        }
+
+        .account-dropdown {
+            width: 100%;
+        }
+
+        .account-link {
+            width: 100%;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .dropdown-menu {
+            position: static;
+            width: 100%;
+            margin-top: 10px;
+            box-shadow: none;
+            border-radius: 0;
         }
 
         .logo-text {
             display: none;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .header-container {
+            padding: 0 15px;
+        }
+
+        .logo-img {
+            height: 32px;
+        }
+
+        .main-nav {
+            width: 100%;
         }
     }
 </style>
@@ -326,5 +429,34 @@
 
         // Expose update function globally
         window.updateNotificationCount = updateNotificationCount;
+
+        // Mobile menu toggle
+        const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+        const mainNav = document.getElementById('main-nav');
+        
+        if (mobileMenuToggle && mainNav) {
+            mobileMenuToggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                mainNav.classList.toggle('active');
+                document.body.style.overflow = mainNav.classList.contains('active') ? 'hidden' : '';
+            });
+
+            // Close menu when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!mainNav.contains(e.target) && !mobileMenuToggle.contains(e.target)) {
+                    mainNav.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            });
+
+            // Close menu when clicking on a nav link
+            const navLinks = mainNav.querySelectorAll('.nav-link, .account-link');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    mainNav.classList.remove('active');
+                    document.body.style.overflow = '';
+                });
+            });
+        }
     });
 </script>

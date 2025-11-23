@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Seeker;
 use App\Http\Controllers\Controller;
 use App\Models\JobDocument;
 use App\Services\ResumeParserService;
+use App\Services\StorageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -21,7 +22,7 @@ class DocumentController extends Controller
         return view('seeker.documents.index', compact('documents'));
     }
 
-    public function store(Request $request)
+    public function store(Request $request, StorageService $storageService)
     {
         $seeker = $request->user('seeker');
 
@@ -34,7 +35,7 @@ class DocumentController extends Controller
         ]);
 
         $file = $request->file('file');
-        $path = $file->store('job-documents', 'public');
+        $path = $storageService->storeFile($file, 'job-documents');
 
         $shouldBeDefault = $request->boolean('set_default')
             || !$seeker->documents()
@@ -95,7 +96,8 @@ class DocumentController extends Controller
             return back()->with('error', 'Cannot delete a default document. Please set another default first.');
         }
 
-        Storage::disk('public')->delete($document->file_path);
+        $storageService = app(StorageService::class);
+        $storageService->delete($document->file_path);
         $document->delete();
 
         return back()->with('success', 'Document deleted successfully.');

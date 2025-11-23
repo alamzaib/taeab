@@ -92,7 +92,7 @@
                                 <button class="btn btn-secondary btn-sm" type="submit">Set Default</button>
                             </form>
                         @endif
-                        <a class="btn-primary btn-sm" href="{{ Storage::disk('public')->url($document->file_path) }}" target="_blank">View</a>
+                        <a class="btn-primary btn-sm" href="{{ storage_url($document->file_path) }}" target="_blank">View</a>
                         <form action="{{ route('seeker.documents.destroy', $document) }}" method="POST" onsubmit="return confirm('Delete this document?');">
                             @csrf
                             @method('DELETE')

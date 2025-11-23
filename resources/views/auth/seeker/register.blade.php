@@ -24,9 +24,10 @@
                 Sign up with LinkedIn
             </a>
 
-            <form method="POST" action="{{ route('seeker.register') }}">
+            <form method="POST" action="{{ route('seeker.register') }}" id="seekerRegisterForm">
                 @csrf
                 <input type="hidden" name="redirect" value="{{ request('redirect') }}">
+                <input type="hidden" name="g-recaptcha-response" id="g-recaptcha-response">
                 <div class="auth-input">
                     <label for="name">Full Name</label>
                     <input type="text" id="name" name="name" value="{{ old('name') }}" required autofocus>
@@ -51,6 +52,24 @@
                 </div>
                 <button type="submit" class="btn-primary" style="width:100%; margin-top:20px;">Create Account</button>
             </form>
+            
+            @push('scripts')
+            <script>
+            document.getElementById('seekerRegisterForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const form = this;
+                
+                if (window.recaptchaSiteKey) {
+                    executeRecaptcha('register').then(function(token) {
+                        document.getElementById('g-recaptcha-response').value = token;
+                        form.submit();
+                    });
+                } else {
+                    form.submit();
+                }
+            });
+            </script>
+            @endpush
         </div>
         <div class="auth-side">
             <h3>Why join Job Portal UAE?</h3>

@@ -53,9 +53,12 @@
             </div>
         </div>
 
-        <div style="display:flex; min-height:600px;">
+        <button class="dashboard-menu-toggle" id="dashboard-menu-toggle" aria-label="Toggle menu">
+            <span>☰</span> Menu
+        </button>
+        <div class="dashboard-layout" style="display:flex; min-height:600px;">
             <!-- Left Sidebar Menu -->
-            <div style="width:280px; background:#f8fafc; border-right:1px solid #e2e8f0; padding:24px 0;">
+            <div class="dashboard-sidebar" style="width:280px; background:#f8fafc; border-right:1px solid #e2e8f0; padding:24px 0;">
                 <nav style="display:flex; flex-direction:column; gap:4px;">
                     <a href="{{ route('seeker.dashboard', ['tab' => 'overview']) }}" class="seeker-nav-item {{ $activeTab === 'overview' ? 'active' : '' }}">
                         <span>📊</span> Overview
@@ -88,7 +91,7 @@
             </div>
 
             <!-- Right Content Area -->
-            <div style="flex:1; padding:32px; overflow-y:auto;">
+            <div class="dashboard-content" style="flex:1; padding:32px; overflow-y:auto;">
                 @if($activeTab === 'overview')
                     @include('seeker.dashboard.tabs.overview')
                 @elseif($activeTab === 'profile')
@@ -152,5 +155,149 @@
     font-size:11px;
     font-weight:600;
 }
+
+.dashboard-menu-toggle {
+    display: none;
+    position: fixed;
+    top: 70px;
+    left: 20px;
+    z-index: 999;
+    background: #235181;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 500;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.dashboard-menu-toggle span {
+    margin-right: 8px;
+    font-size: 20px;
+}
+
+@media (max-width: 768px) {
+    .dashboard-menu-toggle {
+        display: block;
+    }
+
+    .dashboard-layout {
+        flex-direction: column;
+    }
+
+    .dashboard-sidebar {
+        position: fixed;
+        top: 0;
+        left: -100%;
+        width: 280px;
+        height: 100vh;
+        z-index: 998;
+        transition: left 0.3s ease;
+        box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+        overflow-y: auto;
+    }
+
+    .dashboard-sidebar.active {
+        left: 0;
+    }
+
+    .dashboard-sidebar::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        display: none;
+        z-index: -1;
+    }
+
+    .dashboard-sidebar.active::before {
+        display: block;
+    }
+
+    .dashboard-content {
+        width: 100%;
+        padding: 20px 15px !important;
+    }
+
+    .container {
+        padding: 10px !important;
+    }
+
+    .card {
+        padding: 15px !important;
+    }
+
+    div[style*="padding:32px"] {
+        padding: 20px 15px !important;
+    }
+
+    div[style*="padding:24px"] {
+        padding: 15px !important;
+    }
+
+    h1[style*="font-size:36px"] {
+        font-size: 24px !important;
+    }
+
+    div[style*="flex:0 0 220px"] {
+        flex: 1 1 100% !important;
+        margin-top: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .dashboard-sidebar {
+        width: 100%;
+    }
+
+    .dashboard-menu-toggle {
+        left: 10px;
+        top: 60px;
+        padding: 10px 15px;
+        font-size: 14px;
+    }
+
+    .seeker-nav-item {
+        padding: 10px 20px !important;
+        font-size: 14px;
+    }
+}
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const menuToggle = document.getElementById('dashboard-menu-toggle');
+    const sidebar = document.querySelector('.dashboard-sidebar');
+    
+    if (menuToggle && sidebar) {
+        menuToggle.addEventListener('click', function(e) {
+            e.stopPropagation();
+            sidebar.classList.toggle('active');
+            document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
+        });
+
+        // Close sidebar when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+                sidebar.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+
+        // Close sidebar when clicking on a nav link
+        const navLinks = sidebar.querySelectorAll('.seeker-nav-item');
+        navLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                sidebar.classList.remove('active');
+                document.body.style.overflow = '';
+            });
+        });
+    }
+});
+</script>
 @endsection

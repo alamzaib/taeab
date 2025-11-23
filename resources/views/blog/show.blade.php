@@ -4,7 +4,7 @@
 @section('meta_description', $post->meta_description ?? '')
 
 @section('content')
-<section class="blog-post-hero" @if($post->featured_image) style="background-image: linear-gradient(135deg, rgba(15,23,42,.6), rgba(15,23,42,.85)), url('{{ Storage::url($post->featured_image) }}');" @endif>
+<section class="blog-post-hero" @if($post->featured_image) style="background-image: linear-gradient(135deg, rgba(15,23,42,.6), rgba(15,23,42,.85)), url('{{ storage_url($post->featured_image) }}');" @endif>
     <div class="blog-post-hero-content">
         <p class="blog-post-date">{{ optional($post->published_at ?? $post->created_at)->format('F d, Y') }}</p>
         <h1 class="blog-post-title">{{ $post->title }}</h1>

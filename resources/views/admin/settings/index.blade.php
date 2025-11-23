@@ -49,6 +49,16 @@
             Company Attributes
         </a>
     </li>
+    <li class="nav-item">
+        <a class="nav-link {{ $activeTab === 'recaptcha' ? 'active' : '' }}" href="{{ route('admin.settings.recaptcha') }}">
+            reCAPTCHA
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {{ $activeTab === 'storage' ? 'active' : '' }}" href="{{ route('admin.settings.storage') }}">
+            Storage
+        </a>
+    </li>
 </ul>
 
 @if($activeTab === 'general')
@@ -58,6 +68,11 @@
     </div>
 
     <div class="card-body">
+        @if(session('error'))
+            <div class="alert alert-danger">
+                {{ session('error') }}
+            </div>
+        @endif
         <form method="POST" action="{{ route('admin.settings.update') }}" enctype="multipart/form-data">
             @csrf
 
@@ -69,7 +84,7 @@
                     <label for="application_logo">Application Logo</label>
                     @if(!empty($settings['application_logo']))
                         <div style="margin-bottom: 10px;">
-                            <img src="{{ Storage::url($settings['application_logo']) }}" alt="Current Logo" style="max-height: 100px; margin-bottom: 10px;">
+                            <img src="{{ storage_url($settings['application_logo']) }}" alt="Current Logo" style="max-height: 100px; margin-bottom: 10px;">
                             <br>
                             <label>
                                 <input type="checkbox" name="delete_application_logo" value="1"> Delete current logo
@@ -84,7 +99,7 @@
                     <label for="footer_logo">Footer Logo</label>
                     @if(!empty($settings['footer_logo']))
                         <div style="margin-bottom: 10px;">
-                            <img src="{{ Storage::url($settings['footer_logo']) }}" alt="Current Footer Logo" style="max-height: 100px; margin-bottom: 10px;">
+                            <img src="{{ storage_url($settings['footer_logo']) }}" alt="Current Footer Logo" style="max-height: 100px; margin-bottom: 10px;">
                             <br>
                             <label>
                                 <input type="checkbox" name="delete_footer_logo" value="1"> Delete current logo
@@ -99,7 +114,7 @@
                     <label for="favicon">Favicon</label>
                     @if(!empty($settings['favicon']))
                         <div style="margin-bottom: 10px;">
-                            <img src="{{ Storage::url($settings['favicon']) }}" alt="Current Favicon" style="max-height: 32px; margin-bottom: 10px;">
+                            <img src="{{ storage_url($settings['favicon']) }}" alt="Current Favicon" style="max-height: 32px; margin-bottom: 10px;">
                             <br>
                             <label>
                                 <input type="checkbox" name="delete_favicon" value="1"> Delete current favicon
@@ -221,6 +236,10 @@
         @include('admin.settings.tabs.smtp')
     @elseif($activeTab === 'company-attributes')
         @include('admin.settings.tabs.company-attributes')
+    @elseif($activeTab === 'recaptcha')
+        @include('admin.settings.tabs.recaptcha')
+    @elseif($activeTab === 'storage')
+        @include('admin.settings.tabs.storage')
     @endif
 @endif
 

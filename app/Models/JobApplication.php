@@ -20,6 +20,14 @@ class JobApplication extends Model
         'cover_letter_document_id',
         'cover_letter',
         'status',
+        'applied_via_linkedin',
+        'linkedin_profile_url',
+        'linkedin_profile_data',
+    ];
+
+    protected $casts = [
+        'applied_via_linkedin' => 'boolean',
+        'linkedin_profile_data' => 'array',
     ];
 
     public function job(): BelongsTo

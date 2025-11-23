@@ -11,9 +11,11 @@ class CompanySizeController extends Controller
     public function index()
     {
         $companySizes = CompanySize::orderBy('sort_order')->orderBy('name')->get();
+        $industries = \App\Models\Industry::orderBy('sort_order')->orderBy('name')->get();
+        $organizationTypes = \App\Models\OrganizationType::orderBy('sort_order')->orderBy('name')->get();
         $tab = 'company-attributes';
         $settings = [];
-        return view('admin.settings.index', compact('companySizes', 'tab', 'settings'));
+        return view('admin.settings.index', compact('companySizes', 'industries', 'organizationTypes', 'tab', 'settings'));
     }
 
     public function store(Request $request)
